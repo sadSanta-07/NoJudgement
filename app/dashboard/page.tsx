@@ -1,4 +1,3 @@
-import MatchButton from "@/components/MatchButton";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import LogoutButton from "@/components/LoginButton";
@@ -15,8 +14,6 @@ const session = await getServerSession(authOptions);
     <div>
       <h1>Dashboard</h1>
       <p>Welcome {session.user?.name}</p>
-
-       <MatchButton />
        <LogoutButton />
 
     </div>
