@@ -23,6 +23,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
+sessionsAsUser1 MatchSession[] @relation("User1")
+sessionsAsUser2 MatchSession[] @relation("User2")
+
   createdAt     DateTime @default(now())
 }
 
@@ -52,4 +55,17 @@ model Session {
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model MatchSession {
+  id        String   @id @default(cuid())
+  user1Id   String
+  user2Id   String?
+  status    String   // "waiting" | "active" | "ended"
+  level     String   // "beginner" | "intermediate" | "advanced"
+  topic     String   // "casual" | "business" | "travel" | "interview" | "debate"
+  createdAt DateTime @default(now())
+
+  user1 User  @relation("User1", fields: [user1Id], references: [id])
+  user2 User? @relation("User2", fields: [user2Id], references: [id])
 }

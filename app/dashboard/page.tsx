@@ -1,7 +1,11 @@
+import MatchButton from "@/components/MatchButton";
 import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import LogoutButton from "@/components/LoginButton";
 
 export default async function Dashboard() {
-  const session = await getServerSession();
+
+const session = await getServerSession(authOptions);
 
   if (!session) {
     return <div>Not logged in</div>;
@@ -11,6 +15,10 @@ export default async function Dashboard() {
     <div>
       <h1>Dashboard</h1>
       <p>Welcome {session.user?.name}</p>
+
+       <MatchButton />
+       <LogoutButton />
+
     </div>
   );
 }
