@@ -26,12 +26,10 @@ export default function MatchButton({ level, topic, userId }: Props) {
   const startSearch = async () => {
     setStatus("searching");
 
-    // Connect socket
     const socket = io(SOCKET_URL, { transports: ["websocket"] });
     socketRef.current = socket;
 
     socket.on("connect", async () => {
-      // Create/find match in DB first
       const res = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,8 +38,6 @@ export default function MatchButton({ level, topic, userId }: Props) {
 
       const data = await res.json();
       const roomId = data.session.id;
-
-      // Now tell socket server we're in queue with full context
       socket.emit("join_queue", { userId, level, topic, roomId: data.isUser2 ? roomId : null });
     });
 
@@ -89,7 +85,7 @@ export default function MatchButton({ level, topic, userId }: Props) {
       )}
 
       {status === "matched" && (
-        <p className="text-green-600 font-bold">Matched! Redirecting... 🎉</p>
+        <p className="text-green-600 font-bold">Matched! Redirecting...</p>
       )}
     </div>
   );

@@ -62,8 +62,8 @@ model MatchSession {
   user1Id   String
   user2Id   String?
   status    String   // "waiting" | "active" | "ended"
-  level     String   // "beginner" | "intermediate" | "advanced"
-  topic     String   // "casual" | "business" | "travel" | "interview" | "debate"
+  level     String  @default("beginner")  // "beginner" | "intermediate" | "advanced"
+  topic     String   @default("casual") // "casual" | "business" | "travel" | "interview" | "debate"
   createdAt DateTime @default(now())
 
   user1 User  @relation("User1", fields: [user1Id], references: [id])
