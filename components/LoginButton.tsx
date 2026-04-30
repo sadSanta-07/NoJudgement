@@ -16,9 +16,6 @@ export default function LoginButton() {
           height={64}
           className="rounded-full"
         />
-        <p className="text-lg font-semibold">
-          Welcome {session.user?.name}
-        </p>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
           className="bg-red-500 text-white px-4 py-2 rounded"

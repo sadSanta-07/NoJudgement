@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { level, topic } = await req.json();
+  const { level, topic, roomId } = await req.json();
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
@@ -17,29 +17,27 @@ export async function POST(req: Request) {
 
   if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
-  // Try to find exact match first, then level-only match
-  let waitingSession = await prisma.matchSession.findFirst({
-    where: { status: "waiting", level, topic, user1Id: { not: user.id } },
+  const existing = await prisma.matchSession.findFirst({
+    where: { id: roomId },
   });
 
-  if (!waitingSession) {
-    waitingSession = await prisma.matchSession.findFirst({
-      where: { status: "waiting", level, user1Id: { not: user.id } },
-    });
-  }
-
-  if (waitingSession) {
+  if (existing) {
     const updated = await prisma.matchSession.update({
-      where: { id: waitingSession.id },
+      where: { id: roomId },
       data: { user2Id: user.id, status: "active" },
     });
-    return Response.json({ session: updated, isUser2: true });
+    return Response.json({ session: updated });
   }
 
-  // No match found — create new waiting session
   const newSession = await prisma.matchSession.create({
-    data: { user1Id: user.id, status: "waiting", level, topic },
+    data: {
+      id: roomId,
+      user1Id: user.id,
+      status: "waiting",
+      level,
+      topic,
+    },
   });
 
-  return Response.json({ session: newSession, isUser2: false });
+  return Response.json({ session: newSession });
 }

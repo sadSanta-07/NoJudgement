@@ -23,38 +23,37 @@ export default function MatchButton({ level, topic, userId }: Props) {
     };
   }, []);
 
-  const startSearch = async () => {
-    setStatus("searching");
+const startSearch = async () => {
+  setStatus("searching");
 
-    const socket = io(SOCKET_URL, { transports: ["websocket"] });
-    socketRef.current = socket;
+  const socket = io(SOCKET_URL, { transports: ["websocket"] });
+  socketRef.current = socket;
 
-    socket.on("connect", async () => {
-      const res = await fetch("/api/match", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, topic }),
-      });
+  socket.on("connect", () => {
 
-      const data = await res.json();
-      const roomId = data.session.id;
-      socket.emit("join_queue", { userId, level, topic, roomId: data.isUser2 ? roomId : null });
+    socket.emit("join_queue", { userId, level, topic });
+  });
+
+  socket.on("matched", async ({ partnerId, roomId }) => {
+    console.log("Matched! roomId:", roomId);
+    setStatus("matched");
+
+    await fetch("/api/match", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ level, topic, partnerId, roomId }),
     });
 
-    socket.on("matched", ({ partnerId, roomId: emittedRoomId }) => {
-      setStatus("matched");
-      // Small delay so user sees "Matched!" before redirect
-      setTimeout(() => {
-        router.push(`/room/${emittedRoomId || partnerId}`);
-      }, 1000);
-    });
+    setTimeout(() => {
+      router.push(`/room/${roomId}`);
+    }, 1000);
+  });
 
-    socket.on("connect_error", () => {
-      setStatus("idle");
-      console.error("Socket connection failed");
-    });
-  };
-
+  socket.on("connect_error", () => {
+    setStatus("idle");
+    console.error("Socket connection failed");
+  });
+};
   const cancelSearch = () => {
     socketRef.current?.emit("leave_queue");
     socketRef.current?.disconnect();
