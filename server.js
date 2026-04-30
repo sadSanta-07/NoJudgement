@@ -126,3 +126,7 @@ const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
   console.log(`Socket server running on port ${PORT}`);
 });
+
+setInterval(() => {
+  console.log("Keep-alive ping");
+}, 14 * 60 * 1000);

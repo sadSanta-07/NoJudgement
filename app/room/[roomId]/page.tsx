@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { WebRTCConnection } from "@/lib/webrtc";
 import { useSession } from "next-auth/react";
+import { getSocket } from "@/lib/socket-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
 
@@ -20,6 +21,7 @@ export default function RoomPage() {
   const webrtcRef = useRef<WebRTCConnection | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const initializedRef = useRef(false);
 
   const cleanup = useCallback(() => {
     webrtcRef.current?.destroy();
@@ -29,27 +31,34 @@ export default function RoomPage() {
 
   useEffect(() => {
     if (!session?.user) return;
+    if (initializedRef.current) return;
+    if (!roomId || roomId === "undefined") {
+      console.error("Bad roomId:", roomId);
+      return;
+    }
 
-    const socket = io(SOCKET_URL, { transports: ["websocket"] });
+    initializedRef.current = true;
+    console.log("Initializing room:", roomId);
+    console.log("Connecting to socket:", SOCKET_URL);
+
+    const socket = getSocket();
     socketRef.current = socket;
 
     socket.on("connect", async () => {
+      console.log("Socket connected:", socket.id);
+
       const webrtc = new WebRTCConnection({
         socket,
         roomId,
         onRemoteStream: (stream) => {
           console.log("Got remote stream!");
           setCallState("connected");
-
           if (remoteAudioRef.current) {
             remoteAudioRef.current.srcObject = stream;
-
             remoteAudioRef.current.play().catch((e) => {
               console.warn("Autoplay blocked:", e);
-
             });
           }
-
           timerRef.current = setInterval(() => {
             setDuration((d) => d + 1);
           }, 1000);
@@ -65,8 +74,16 @@ export default function RoomPage() {
       webrtc.joinRoom();
     });
 
+    socket.on("connect_error", (err) => {
+      console.error("Socket connect error:", err.message);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
     return () => cleanup();
-  }, [session, roomId, setCallState, cleanup]);
+  }, [session, roomId, cleanup]);
 
   const handleMute = () => {
     const newMuted = !isMuted;
@@ -92,7 +109,7 @@ export default function RoomPage() {
 
       {callState === "connected" && (
         <>
-          <p className="text-green-600 font-bold">Live Practice</p>
+          <p className="text-green-600 font-bold">🟢 Live Practice</p>
           <p className="text-2xl font-mono">{formatTime(duration)}</p>
         </>
       )}

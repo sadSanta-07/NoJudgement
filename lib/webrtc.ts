@@ -96,6 +96,7 @@ export class WebRTCConnection {
 
   private setupSocketListeners() {
     this.socket.on("room_role", async ({ role }: { role: "caller" | "callee" }) => {
+       console.log("Got role:", role);
       this.isCaller = role === "caller";
       console.log(`Role assigned: ${role}`);
 
@@ -133,6 +134,7 @@ export class WebRTCConnection {
     });
 
     this.socket.on("webrtc_ice_candidate", async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+      console.log("Got ICE candidate, remoteDescSet:", this.remoteDescSet);
       if (!this.remoteDescSet) {
         console.log("Buffering ICE candidate");
         this.iceCandidateBuffer.push(candidate);
@@ -180,8 +182,8 @@ export class WebRTCConnection {
   }
 
   joinRoom() {
-    this.socket.emit("join_room", this.roomId);
     console.log("Joined room:", this.roomId);
+    this.socket.emit("join_room", this.roomId);
   }
 
   toggleMute(muted: boolean) {

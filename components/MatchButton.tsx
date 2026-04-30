@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
+import { getSocket } from "@/lib/socket-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
 
@@ -23,37 +24,42 @@ export default function MatchButton({ level, topic, userId }: Props) {
     };
   }, []);
 
-const startSearch = async () => {
-  setStatus("searching");
+  const startSearch = async () => {
+    setStatus("searching");
 
-  const socket = io(SOCKET_URL, { transports: ["websocket"] });
-  socketRef.current = socket;
+    const socket = getSocket();
+    socketRef.current = socket;
 
-  socket.on("connect", () => {
+    socket.on("connect", () => {
 
-    socket.emit("join_queue", { userId, level, topic });
-  });
-
-  socket.on("matched", async ({ partnerId, roomId }) => {
-    console.log("Matched! roomId:", roomId);
-    setStatus("matched");
-
-    await fetch("/api/match", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ level, topic, partnerId, roomId }),
+      socket.emit("join_queue", { userId, level, topic });
     });
 
-    setTimeout(() => {
-      router.push(`/room/${roomId}`);
-    }, 1000);
-  });
+    socket.on("matched", async ({ partnerId, roomId }) => {
+      console.log("matched event received:", { partnerId, roomId });
 
-  socket.on("connect_error", () => {
-    setStatus("idle");
-    console.error("Socket connection failed");
-  });
-};
+      if (!roomId) {
+        console.error("roomId is undefined — socket server issue");
+        setStatus("idle");
+        return;
+      }
+      setStatus("matched");
+      await fetch("/api/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level, topic, partnerId, roomId }),
+      });
+
+      setTimeout(() => {
+        router.push(`/room/${roomId}`);
+      }, 1000);
+    });
+
+    socket.on("connect_error", () => {
+      setStatus("idle");
+      console.error("Socket connection failed");
+    });
+  };
   const cancelSearch = () => {
     socketRef.current?.emit("leave_queue");
     socketRef.current?.disconnect();
