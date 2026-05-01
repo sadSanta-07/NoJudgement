@@ -48,14 +48,14 @@ export default function Home() {
         initial="hidden"
         animate="show"
         variants={stagger}
-        className="relative flex flex-col items-center text-center px-6 pt-32 pb-20"
+        className="min-h-[80vh] flex flex-col items-center text-center px-6 pt-20 pb-10"
       >
 
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center space-x-2 bg-[#A5BBFC]/20 text-[var(--color-tertiary)] px-4 py-2 rounded-full text-sm font-semibold mb-8 mt-16"
+          className="inline-flex items-center space-x-2 bg-[#A5BBFC]/20 text-[var(--color-tertiary)] px-4 rounded-full text-sm font-semibold mb-4 mt-4"
         >
           <Star size={16} />
           <span>Now available in Beta</span>
@@ -65,14 +65,14 @@ export default function Home() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-5xl md:text-7xl font-bold text-[var(--color-tertiary)] mb-6">
+          className="text-5xl md:text-7xl font-bold text-[var(--color-tertiary)] mb-4">
           Speak English With Confidence.
         </motion.h1>
 
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }} className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-12">
+          transition={{ delay: 0.3 }} className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-8">
           Practice in real-time with people and AI. No judgment. Just growth.
         </motion.p>
 
@@ -87,7 +87,9 @@ export default function Home() {
             <LoginButton label="Login with Google" />
           </div>
         </motion.div>
-        <AICard />
+        <div className="w-full max-w-3xl mt-6">
+          <AICard />
+        </div>
       </motion.main>
 
       {/* FEATURES */}

@@ -21,16 +21,21 @@ export default function AICard() {
 
     return () => clearInterval(interval);
   }, []);
+  const progress = text.length / sentence.length;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, scale: 0.95 }}
+      initial={{ opacity: 0, y: 60, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.6 }}
-      className="mt-20 w-full max-w-3xl relative"
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="w-full max-w-3xl relative"
     >
-      {/* Glow */}
-      <div className="absolute inset-0 bg-gradient-to-r from-orange-200/40 to-blue-200/40 blur-3xl rounded-full" />
+      <div
+        className="absolute inset-0 blur-3xl rounded-full transition-all duration-300"
+        style={{
+          background: `linear-gradient(to right, rgba(255,161,51,${0.2 + progress * 0.4}), rgba(165,187,252,${0.2 + progress * 0.4}))`,
+        }}
+      />
 
       {/* Card */}
       <div className="relative backdrop-blur-2xl bg-white/70 border border-white/40 rounded-3xl shadow-2xl p-6">
@@ -38,7 +43,7 @@ export default function AICard() {
         {/* TOP */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            
+
             {/* Mic with pulse */}
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-orange-400/30 animate-ping" />

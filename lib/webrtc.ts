@@ -27,6 +27,10 @@ export class WebRTCConnection {
   private isCaller: boolean = false;
   private iceCandidateBuffer: RTCIceCandidateInit[] = [];
   private remoteDescSet: boolean = false;
+  private destroyed: boolean = false; // track destruction
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handlers: Record<string, (...args: any[]) => void> = {};
 
   constructor({
     socket,
@@ -51,13 +55,14 @@ export class WebRTCConnection {
 
   private setupPeerConnection() {
     this.pc.ontrack = (event) => {
+      if (this.destroyed) return;
       console.log("Got remote track");
       this.onRemoteStream(event.streams[0]);
     };
 
     this.pc.onicecandidate = (event) => {
+      if (this.destroyed) return;
       if (event.candidate) {
-        console.log("Sending ICE candidate");
         this.socket.emit("webrtc_ice_candidate", {
           candidate: event.candidate,
           roomId: this.roomId,
@@ -69,21 +74,15 @@ export class WebRTCConnection {
       console.log("WebRTC state:", this.pc.connectionState);
     };
 
-    this.pc.onicegatheringstatechange = () => {
-      console.log("ICE gathering:", this.pc.iceGatheringState);
-    };
-
     this.pc.oniceconnectionstatechange = () => {
       console.log("ICE connection:", this.pc.iceConnectionState);
       if (this.pc.iceConnectionState === "failed") {
-        console.warn("ICE failed — restarting...");
         this.pc.restartIce();
       }
     };
   }
 
   private async flushIceCandidates() {
-    console.log(`Flushing ${this.iceCandidateBuffer.length} buffered ICE candidates`);
     for (const candidate of this.iceCandidateBuffer) {
       try {
         await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
@@ -95,34 +94,31 @@ export class WebRTCConnection {
   }
 
   private setupSocketListeners() {
-    this.socket.on("room_role", async ({ role }: { role: "caller" | "callee" }) => {
-       console.log("Got role:", role);
-      this.isCaller = role === "caller";
+    // Store named handlers so we remove only THIS instance's listeners
+    this.handlers["room_role"] = async ({ role }: { role: "caller" | "callee" }) => {
+      if (this.destroyed) return;
       console.log(`Role assigned: ${role}`);
+      this.isCaller = role === "caller";
+      if (this.isCaller) await this.createOffer();
+    };
 
-      if (this.isCaller) {
-        await this.createOffer();
-      }
-    });
-
-    this.socket.on("webrtc_offer", async ({ offer }: { offer: RTCSessionDescriptionInit }) => {
+    this.handlers["webrtc_offer"] = async ({ offer }: { offer: RTCSessionDescriptionInit }) => {
+      if (this.destroyed) return;
       console.log("Got offer");
       try {
         await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
         this.remoteDescSet = true;
         await this.flushIceCandidates();
-
         const answer = await this.pc.createAnswer();
         await this.pc.setLocalDescription(answer);
-
         this.socket.emit("webrtc_answer", { answer, roomId: this.roomId });
-        console.log("Sent answer");
       } catch (e) {
         console.error("Error handling offer:", e);
       }
-    });
+    };
 
-    this.socket.on("webrtc_answer", async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
+    this.handlers["webrtc_answer"] = async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
+      if (this.destroyed) return;
       console.log("Got answer");
       try {
         await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
@@ -131,12 +127,11 @@ export class WebRTCConnection {
       } catch (e) {
         console.error("Error handling answer:", e);
       }
-    });
+    };
 
-    this.socket.on("webrtc_ice_candidate", async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
-      console.log("Got ICE candidate, remoteDescSet:", this.remoteDescSet);
+    this.handlers["webrtc_ice_candidate"] = async ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+      if (this.destroyed) return;
       if (!this.remoteDescSet) {
-        console.log("Buffering ICE candidate");
         this.iceCandidateBuffer.push(candidate);
         return;
       }
@@ -145,15 +140,21 @@ export class WebRTCConnection {
       } catch (e) {
         console.error("ICE candidate error:", e);
       }
-    });
+    };
 
-    this.socket.on("peer_left", () => {
+    this.handlers["peer_left"] = () => {
+      if (this.destroyed) return;
       console.log("Peer left");
       this.onPeerLeft();
+    };
+
+    Object.entries(this.handlers).forEach(([event, handler]) => {
+      this.socket.on(event, handler);
     });
   }
 
   private async createOffer() {
+    if (this.destroyed || this.pc.signalingState === "closed") return;
     try {
       const offer = await this.pc.createOffer();
       await this.pc.setLocalDescription(offer);
@@ -165,14 +166,27 @@ export class WebRTCConnection {
   }
 
   async initLocalStream() {
+    if (this.destroyed || this.pc.signalingState === "closed") {
+      console.warn("Cannot init stream — connection closed");
+      return null;
+    }
+
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false,
       });
+
+      if (this.destroyed || this.pc.signalingState as string === "closed") {
+        this.localStream.getTracks().forEach((t) => t.stop());
+        console.warn("PC closed during getUserMedia, aborting");
+        return null;
+      }
+
       this.localStream.getTracks().forEach((track) => {
         this.pc.addTrack(track, this.localStream!);
       });
+
       console.log("Got local audio stream");
       return this.localStream;
     } catch (e) {
@@ -182,27 +196,29 @@ export class WebRTCConnection {
   }
 
   joinRoom() {
-    console.log("Joined room:", this.roomId);
+    if (this.destroyed) return;
+    console.log("Joining room:", this.roomId);
     this.socket.emit("join_room", this.roomId);
   }
 
   toggleMute(muted: boolean) {
-    if (this.localStream) {
-      this.localStream.getAudioTracks().forEach((track) => {
-        track.enabled = !muted;
-      });
-    }
+    this.localStream?.getAudioTracks().forEach((track) => {
+      track.enabled = !muted;
+    });
   }
 
   destroy() {
+    if (this.destroyed) return;
+    this.destroyed = true;
+
     this.localStream?.getTracks().forEach((t) => t.stop());
-    this.pc.close();
-    this.socket.off("room_role");
-    this.socket.off("webrtc_offer");
-    this.socket.off("webrtc_answer");
-    this.socket.off("webrtc_ice_candidate");
-    this.socket.off("peer_left");
+
+    Object.entries(this.handlers).forEach(([event, handler]) => {
+      this.socket.off(event, handler);
+    });
+
     this.socket.emit("leave_room", this.roomId);
+    this.pc.close();
     console.log("WebRTC cleaned up");
   }
 }
