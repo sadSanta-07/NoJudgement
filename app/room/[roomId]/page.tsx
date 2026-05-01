@@ -8,8 +8,6 @@ import { useSession } from "next-auth/react";
 import { getSocket } from "@/lib/socket-client";
 import { useAudioRecorder } from "@/lib/useAudioRecorder";
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
-
 export default function RoomPage() {
   const { roomId } = useParams<{ roomId: string }>();
   const { data: session } = useSession();
@@ -47,7 +45,6 @@ export default function RoomPage() {
 
   const cleanup = useCallback(() => {
     webrtcRef.current?.destroy();
-    socketRef.current?.disconnect();
     stopRecorder();
     if (timerRef.current) clearInterval(timerRef.current);
     if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
@@ -122,9 +119,7 @@ export default function RoomPage() {
         webrtc.joinRoom();
         startRecorder(stream);
       })
-      .catch((err) => console.error("Stream init failed:", err));
-
-    return () => cleanup();
+      .catch(console.error);
   }, [session, roomId, cleanup, handleCallEnd, startRecorder]);
 
   const handleMute = () => {

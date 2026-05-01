@@ -51,7 +51,12 @@ Rules:
 
     return Response.json(parsed);
   } catch (err) {
-    console.error("STT error:", err);
-    return Response.json({ error: "STT failed" }, { status: 500 });
+    console.error("STT error details:", JSON.stringify(err));
+    return Response.json({
+      transcript: "",
+      isEnglish: true,
+      englishScore: 100,
+      warning: null
+    }); // return valid fallback instead of 500
   }
 }

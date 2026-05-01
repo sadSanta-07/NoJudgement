@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
 import { getSocket } from "@/lib/socket-client";
-
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
 
 interface Props {
   level: string;
@@ -59,7 +57,7 @@ export default function MatchButton({ level, topic, userId }: Props) {
       console.error("Socket connection failed");
     });
   };
-  
+
   const cancelSearch = () => {
     socketRef.current?.emit("leave_queue");
     setStatus("idle");

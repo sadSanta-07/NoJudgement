@@ -14,16 +14,17 @@ export function useAudioRecorder(
   const fullTranscriptRef = useRef<string>("");
 
   const start = useCallback((stream: MediaStream) => {
-    const recorder = new MediaRecorder(stream, {
-      mimeType: MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/ogg",
-    });
+    const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      ? "audio/webm;codecs=opus"
+      : MediaRecorder.isTypeSupported("audio/webm")
+      ? "audio/webm"
+      : "audio/ogg";
 
+    const recorder = new MediaRecorder(stream, { mimeType });
     recorderRef.current = recorder;
 
     recorder.ondataavailable = async (event) => {
-      if (event.data.size < 1000) return; // skip tiny/silent chunks
+      if (event.data.size < 1000) return;
 
       try {
         const formData = new FormData();
@@ -47,12 +48,14 @@ export function useAudioRecorder(
       }
     };
 
-    recorder.start(3000); // every 3 seconds
+    recorder.start(3000);
     console.log("Audio recorder started");
   }, [onChunkResult]);
 
   const stop = useCallback(() => {
-    recorderRef.current?.stop();
+    if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      recorderRef.current.stop();
+    }
     console.log("Audio recorder stopped");
   }, []);
 
