@@ -5,9 +5,20 @@ import { useEffect } from "react";
 import LoginButton from "@/components/LoginButton";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Mic, Globe, Shield, Star } from "lucide-react";
+import AICard from "@/components/AICard";
+
+
+const stagger = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
 
 export default function Home() {
   const { data: session } = useSession();
@@ -17,7 +28,7 @@ export default function Home() {
     if (session) {
       router.push("/dashboard");
     }
-  }, [session]);
+  }, [session, router]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -33,7 +44,13 @@ export default function Home() {
       <Navbar />
 
       {/* HERO */}
-      <main className="relative  flex flex-col items-center text-center px-6 py-12 md:py-22 pt-32">
+      <motion.main
+        initial="hidden"
+        animate="show"
+        variants={stagger}
+        className="relative flex flex-col items-center text-center px-6 pt-32 pb-20"
+      >
+
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -44,26 +61,40 @@ export default function Home() {
           <span>Now available in Beta</span>
         </motion.div>
 
-        <motion.h1 className="text-5xl md:text-7xl font-bold text-[var(--color-tertiary)] mb-6">
-          Speak English Without Fear.
+        <motion.h1
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-5xl md:text-7xl font-bold text-[var(--color-tertiary)] mb-6">
+          Speak English With Confidence.
         </motion.h1>
 
-        <motion.p className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-12">
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }} className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-12">
           Practice in real-time with people and AI. No judgment. Just growth.
         </motion.p>
 
-        <div className="flex gap-4">
-          <LoginButton label="Start Practicing" />
-          <LoginButton label="Login with Google" />
-        </div>
-      </main>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex gap-4"
+        >
+          <div className="flex gap-4">
+            <LoginButton label="Start Practicing" />
+            <LoginButton label="Login with Google" />
+          </div>
+        </motion.div>
+        <AICard />
+      </motion.main>
 
       {/* FEATURES */}
       <section className="px-6 md:px-16 py-24 bg-white">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-[var(--color-tertiary)] mb-16">
           Master conversations everywhere
         </h2>
-
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {[
             {
@@ -84,10 +115,12 @@ export default function Home() {
           ].map((f, i) => (
             <motion.div
               key={i}
-              whileHover={{ y: -6 }}
-              className="bg-[var(--color-neutral)] p-8 rounded-2xl border border-[var(--color-border)]"
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="group bg-[var(--color-neutral)] p-8 rounded-2xl border border-[var(--color-border)] hover:shadow-xl transition"
+
             >
-              <f.icon className="text-[#FFA133] mb-4" />
+              <f.icon className="text-[#FFA133] mb-4 transition-transform duration-300 group-hover:scale-110" />
               <h3 className="font-semibold text-[var(--color-tertiary)] mb-2">
                 {f.title}
               </h3>
@@ -99,7 +132,7 @@ export default function Home() {
         </div>
       </section>
 
-       {/* feature */}
+      {/* feature */}
       <section className="px-6 md:px-16 py-32 bg-[var(--color-neutral)]">
         <div className="max-w-6xl mx-auto">
 
@@ -116,11 +149,18 @@ export default function Home() {
           {/* GRID */}
           <div className="grid md:grid-cols-3 gap-8">
 
-            {/* BIG LEFT (spans 2 columns) */}
-            <div className="md:col-span-2 bg-white rounded-3xl p-10 border border-[var(--color-border)] flex justify-between items-center">
+            {/* BIG LEFT */}
+            <motion.div
+              whileHover={{ scale: 1.02, y: -6 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="group md:col-span-2 bg-white rounded-3xl p-10 border border-[var(--color-border)] flex justify-between items-center relative overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
 
-              <div className="max-w-sm">
-                <div className="w-12 h-12 bg-[#FFA133]/20 rounded-xl flex items-center justify-center mb-6">
+              {/* glow */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-orange-100/30 to-blue-100/30 blur-2xl" />
+
+              <div className="max-w-sm relative z-10">
+                <div className="w-12 h-12 bg-[#FFA133]/20 rounded-xl flex items-center justify-center mb-6 transition group-hover:scale-110">
                   <Mic className="text-[#FFA133]" size={24} />
                 </div>
 
@@ -133,85 +173,132 @@ export default function Home() {
                 </p>
 
                 <div className="flex -space-x-2">
-                  <img src="https://i.pravatar.cc/32?img=1" className="w-9 h-9 rounded-full border-2 border-white" />
-                  <img src="https://i.pravatar.cc/32?img=2" className="w-9 h-9 rounded-full border-2 border-white" />
-                  <img src="https://i.pravatar.cc/32?img=3" className="w-9 h-9 rounded-full border-2 border-white" />
+                  <Image
+                    src="https://i.pravatar.cc/32?img=1"
+                    alt="User avatar"
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full border-2 border-white transition hover:scale-110" />
+                  <Image
+                    src="https://i.pravatar.cc/32?img=2"
+                    alt="User avatar"
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full border-2 border-white transition hover:scale-110" />
+                  <Image
+                    src="https://i.pravatar.cc/32?img=3"
+                    alt="User avatar"
+                    width={36}
+                    height={36}
+                    className="w-9 h-9 rounded-full border-2 border-white transition hover:scale-110" />
                   <span className="ml-3 text-sm text-gray-400">+12k</span>
                 </div>
               </div>
 
-              <div className="w-48 h-48 bg-[#FFA133]/10 rounded-2xl hidden md:block" />
-            </div>
+              <div className="w-48 h-48 bg-[#FFA133]/10 rounded-2xl hidden md:block group-hover:scale-105 transition" />
+
+            </motion.div>
 
             {/* TOP RIGHT */}
-            <div className="bg-white rounded-3xl p-10 border border-[var(--color-border)]">
-              <div className="w-12 h-12 bg-[#A5BBFC]/20 rounded-xl flex items-center justify-center mb-6">
-                <Globe className="text-[#A5BBFC]" size={24} />
+            <motion.div
+              whileHover={{ scale: 1.02, y: -6 }}
+              className="group bg-white rounded-3xl p-10 border border-[var(--color-border)] relative overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
+
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-blue-100/30 to-purple-100/30 blur-2xl" />
+
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-[#A5BBFC]/20 rounded-xl flex items-center justify-center mb-6 transition group-hover:scale-110">
+                  <Globe className="text-[#A5BBFC]" size={24} />
+                </div>
+
+                <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
+                  3 Practice Modes
+                </h3>
+
+                <p className="text-base text-[var(--color-text-muted)] mb-6">
+                  Tailored scenarios for every goal.
+                </p>
+
+                <div className="space-y-3">
+                  {["Interview", "Casual", "Debate"].map((m) => (
+                    <div
+                      key={m}
+                      className="bg-[var(--color-neutral)] px-5 py-3 rounded-lg text-base transition hover:scale-[1.03]"
+                    >
+                      {m}
+                    </div>
+                  ))}
+                </div>
               </div>
-
-              <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
-                3 Practice Modes
-              </h3>
-
-              <p className="text-base text-[var(--color-text-muted)] mb-6">
-                Tailored scenarios for every goal.
-              </p>
-
-              <div className="space-y-3">
-                {["Interview", "Casual", "Debate"].map((m) => (
-                  <div key={m} className="bg-[var(--color-neutral)] px-5 py-3 rounded-lg text-base">
-                    {m}
-                  </div>
-                ))}
-              </div>
-            </div>
+            </motion.div>
 
             {/* BOTTOM LEFT */}
-            <div className="bg-white rounded-3xl p-10 border border-[var(--color-border)]">
-              <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
-                Smart Matchmaking
-              </h3>
+            <motion.div
+              whileHover={{ scale: 1.02, y: -6 }}
+              className="group bg-white rounded-3xl p-10 border border-[var(--color-border)] relative overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
 
-              <p className="text-base text-[var(--color-text-muted)] mb-6">
-                Pair up with partners at your exact skill level.
-              </p>
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-purple-100/30 to-orange-100/30 blur-2xl" />
 
-              <div className="bg-[var(--color-neutral)] p-5 rounded-xl flex justify-between text-base">
-                <span>YOU: B2</span>
-                <span>⇄</span>
-                <span>PARTNER: B2</span>
-              </div>
-            </div>
+              <div className="relative z-10">
+                <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
+                  Smart Matchmaking
+                </h3>
 
-            {/* BOTTOM RIGHT (spans 2 columns) */}
-            <div className="md:col-span-2 bg-white rounded-3xl p-10 border border-[var(--color-border)]">
-
-              <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
-                AI-Powered Analysis
-              </h3>
-
-              <p className="text-base text-[var(--color-text-muted)] mb-6">
-                Get detailed, non-intrusive feedback on pronunciation, vocabulary, and grammar.
-              </p>
-
-              <div className="mb-4 flex justify-between text-base">
-                <span>Fluency</span>
-                <span className="text-[#FFA133] font-semibold">85%</span>
-              </div>
-
-              <div className="w-full h-2.5 bg-gray-200 rounded-full mb-6">
-                <div className="h-2.5 bg-[#FFA133] rounded-full w-[85%]" />
-              </div>
-
-              <div className="text-base">
-                <p className="text-red-400 line-through">
-                  I have went to the store.
+                <p className="text-base text-[var(--color-text-muted)] mb-6">
+                  Pair up with partners at your exact skill level.
                 </p>
-                <p className="text-green-600">
-                  ✓ I went to the store. (Past simple)
-                </p>
+
+                <div className="bg-[var(--color-neutral)] p-5 rounded-xl flex justify-between text-base transition hover:scale-[1.02]">
+                  <span>YOU: B2</span>
+                  <span>⇄</span>
+                  <span>PARTNER: B2</span>
+                </div>
               </div>
-            </div>
+            </motion.div>
+
+            {/* BOTTOM RIGHT */}
+            <motion.div
+              whileHover={{ scale: 1.02, y: -6 }}
+              className="group md:col-span-2 bg-white rounded-3xl p-10 border border-[var(--color-border)] relative overflow-hidden transition-all duration-300 hover:shadow-xl"
+            >
+
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-orange-100/30 to-green-100/30 blur-2xl" />
+
+              <div className="relative z-10">
+                <h3 className="text-2xl font-semibold text-[var(--color-tertiary)] mb-3">
+                  AI-Powered Analysis
+                </h3>
+
+                <p className="text-base text-[var(--color-text-muted)] mb-6">
+                  Get detailed, non-intrusive feedback on pronunciation, vocabulary, and grammar.
+                </p>
+
+                <div className="mb-4 flex justify-between text-base">
+                  <span>Fluency</span>
+                  <span className="text-[#FFA133] font-semibold">85%</span>
+                </div>
+
+                <div className="w-full h-2.5 bg-gray-200 rounded-full mb-6 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: "85%" }}
+                    transition={{ duration: 1 }}
+                    className="h-2.5 bg-[#FFA133] rounded-full"
+                  />
+                </div>
+
+                <div className="text-base">
+                  <p className="text-red-400 line-through">
+                    I have went to the store.
+                  </p>
+                  <p className="text-green-600">
+                    ✓ I went to the store. (Past simple)
+                  </p>
+                </div>
+              </div>
+            </motion.div>
 
           </div>
         </div>
@@ -222,20 +309,34 @@ export default function Home() {
 
           {/* LEFT SIDE */}
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-tertiary)] mb-6">
-              Stay motivated. Build habits.
-            </h2>
 
-            <p className="text-lg md:text-xl text-[var(--color-text-muted)] mb-10 max-w-md">
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl md:text-5xl font-bold text-[var(--color-tertiary)] mb-6"
+            >
+              Stay motivated. Build habits.
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-lg md:text-xl text-[var(--color-text-muted)] mb-10 max-w-md"
+            >
               Earn points for every minute you practice. Climb the leaderboard and unlock premium avatars as you progress.
-            </p>
+            </motion.p>
 
             {/* STATS */}
             <div className="flex items-center gap-10 mb-10">
 
               {/* Streak */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#FFA133]/20 flex items-center justify-center">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#FFA133]/20 flex items-center justify-center text-lg">
                   🔥
                 </div>
                 <div>
@@ -246,11 +347,14 @@ export default function Home() {
                     CURRENT STREAK
                   </p>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Points */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-[#A5BBFC]/20 flex items-center justify-center">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#A5BBFC]/20 flex items-center justify-center text-lg">
                   ⭐
                 </div>
                 <div>
@@ -261,64 +365,92 @@ export default function Home() {
                     TOTAL POINTS
                   </p>
                 </div>
-              </div>
+              </motion.div>
+
             </div>
 
             {/* BUTTON */}
-            <button className="px-6 py-3 rounded-full border border-[var(--color-border)] text-[var(--color-tertiary)] text-lg hover:bg-[var(--color-neutral)] transition">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.96 }}
+              className="px-6 py-3 rounded-full border border-[var(--color-border)] text-[var(--color-tertiary)] text-lg transition-all duration-300 hover:shadow-md hover:bg-[var(--color-neutral)]"
+            >
               View Leaderboard
-            </button>
+            </motion.button>
           </div>
 
-          {/* RIGHT SIDE (Leaderboard Card) */}
-          <div className="bg-[var(--color-neutral)] p-8 rounded-3xl shadow-md border border-[var(--color-border)]">
+          {/* RIGHT SIDE */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="group bg-[var(--color-neutral)] p-8 rounded-3xl shadow-md border border-[var(--color-border)] relative overflow-hidden"
+          >
 
-            <p className="text-center text-sm tracking-wide text-[var(--color-text-muted)] mb-6">
+            {/* glow effect */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-orange-100/30 to-blue-100/30 blur-2xl" />
+
+            <p className="relative z-10 text-center text-sm tracking-wide text-[var(--color-text-muted)] mb-6">
               GLOBAL TOP 3
             </p>
 
-            <div className="space-y-4">
+            <div className="relative z-10 space-y-4">
 
               {/* 1st */}
-              <div className="flex items-center justify-between bg-[#FFA133]/10 border border-[#FFA133]/30 px-5 py-4 rounded-xl">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center justify-between bg-[#FFA133]/10 border border-[#FFA133]/30 px-5 py-4 rounded-xl"
+              >
                 <div className="flex items-center gap-4">
                   <span className="font-semibold">1</span>
-                  <img src="https://i.pravatar.cc/40?img=5" className="w-10 h-10 rounded-full" />
+                  <img src="https://i.pravatar.cc/40?img=5"
+                    alt="User avatar"
+                    className="w-10 h-10 rounded-full" />
                   <span className="font-medium">Sarah J.</span>
                 </div>
                 <span className="font-medium text-[var(--color-tertiary)]">
                   4,520 pts
                 </span>
-              </div>
+              </motion.div>
 
               {/* 2nd */}
-              <div className="flex items-center justify-between bg-white px-5 py-4 rounded-xl border border-[var(--color-border)]">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center justify-between bg-white px-5 py-4 rounded-xl border border-[var(--color-border)]"
+              >
                 <div className="flex items-center gap-4">
                   <span>2</span>
-                  <img src="https://i.pravatar.cc/40?img=8" className="w-10 h-10 rounded-full" />
+                  <img src="https://i.pravatar.cc/40?img=8"
+                    alt="User avatar"
+                    className="w-10 h-10 rounded-full" />
                   <span>David M.</span>
                 </div>
                 <span>3,890 pts</span>
-              </div>
+              </motion.div>
 
               {/* 3rd */}
-              <div className="flex items-center justify-between bg-[#FFA133]/5 px-5 py-4 rounded-xl border border-[#FFA133]/20">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="flex items-center justify-between bg-[#FFA133]/5 px-5 py-4 rounded-xl border border-[#FFA133]/20"
+              >
                 <div className="flex items-center gap-4">
                   <span>3</span>
-                  <img src="https://i.pravatar.cc/40?img=11" className="w-10 h-10 rounded-full" />
+                  <img src="https://i.pravatar.cc/40?img=11"
+                    alt="User avatar"
+                    className="w-10 h-10 rounded-full" />
                   <span>You</span>
                 </div>
                 <span className="text-[#FFA133] font-medium">
                   1,250 pts
                 </span>
-              </div>
+              </motion.div>
 
             </div>
-          </div>
+          </motion.div>
 
         </div>
       </section>
       <Footer />
-    </div>
+    </div >
   );
 }

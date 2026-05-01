@@ -9,3 +9,7 @@
   --color-text-muted: #6B7280;
   --color-border: #E5E7EB;
 }
+
+html {
+  scroll-behavior: smooth;
+}

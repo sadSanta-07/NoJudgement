@@ -1,41 +1,61 @@
 "use client";
 
 import LoginButton from "./LoginButton";
+import { motion } from "framer-motion";
 
 export default function Navbar() {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full flex items-center justify-between px-6 md:px-12 py-7 md:py-8 backdrop-blur-lg bg-white/70 border-b border-white/20 shadow-sm">
+    <motion.header
+      initial={{ y: -40, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="w-full flex items-center justify-between px-6 md:px-12 py-4 md:py-5 backdrop-blur-md bg-white/70 border-b border-white/20"
+    >
 
-      {/* LOGO (bigger + stronger presence) */}
-      <div className="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 via-purple-400 to-blue-500 bg-clip-text text-transparent">
+      {/* LOGO */}
+      <motion.div
+        whileHover={{ scale: 1.04 }}
+        className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-orange-400 via-purple-400 to-blue-500 bg-clip-text text-transparent cursor-pointer"
+      >
         NoJudgment
-      </div>
+      </motion.div>
 
       {/* CENTER LINKS */}
-      <nav className="hidden md:flex items-center space-x-10 text-gray-500 font-medium text-lg">
-        <a href="#" className="hover:text-gray-900 transition-colors">
-          About
-        </a>
-        <a href="#" className="hover:text-gray-900 transition-colors">
-          Modes
-        </a>
-        <a href="#" className="hover:text-gray-900 transition-colors">
-          Community
-        </a>
+      <nav className="hidden md:flex items-center space-x-8 text-gray-500 font-medium">
+
+        {[
+          { name: "About", id: "about" },
+          { name: "Modes", id: "modes" },
+          { name: "Community", id: "community" },
+        ].map((item) => (
+          <a
+            key={item.name}
+            href={`#${item.id}`}
+            className="relative group"
+          >
+            <span className="transition-colors group-hover:text-gray-900">
+              {item.name}
+            </span>
+
+            {/* underline */}
+            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-orange-400 to-blue-500 transition-all duration-300 group-hover:w-full" />
+          </a>
+        ))}
+
       </nav>
 
       {/* RIGHT SIDE */}
-      <div className="flex items-center space-x-6">
+      <div className="flex items-center space-x-3">
 
-        {/* Login */}
-        <LoginButton label="Login" />
+        <motion.div whileHover={{ scale: 1.05 }}>
+          <LoginButton label="Login" />
+        </motion.div>
 
-        {/* Get Started */}
-        <div className="hidden sm:block">
+        <motion.div whileHover={{ scale: 1.05 }}>
           <LoginButton label="Get Started" />
-        </div>
+        </motion.div>
 
       </div>
-    </header>
+    </motion.header>
   );
 }
