@@ -28,6 +28,7 @@ export class WebRTCConnection {
   private iceCandidateBuffer: RTCIceCandidateInit[] = [];
   private remoteDescSet: boolean = false;
   private destroyed: boolean = false; // track destruction
+  private joinedAt: number = 0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handlers: Record<string, (...args: any[]) => void> = {};
@@ -143,7 +144,10 @@ export class WebRTCConnection {
     };
 
     this.handlers["peer_left"] = () => {
-      if (this.destroyed) return;
+      if (Date.now() - this.joinedAt < 2000) {
+        console.warn("⚠️ Ignoring stale peer_left event");
+        return;
+      }
       console.log("Peer left");
       this.onPeerLeft();
     };
@@ -197,6 +201,7 @@ export class WebRTCConnection {
 
   joinRoom() {
     if (this.destroyed) return;
+    this.joinedAt = Date.now();
     console.log("Joining room:", this.roomId);
     this.socket.emit("join_room", this.roomId);
   }

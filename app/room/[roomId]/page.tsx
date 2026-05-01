@@ -90,7 +90,7 @@ export default function RoomPage() {
     if (initializedRef.current) return;
     if (!roomId || roomId === "undefined") return;
     initializedRef.current = true;
-    const socket = getSocket();
+    const socket = getSocket(roomId);
     socketRef.current = socket;
 
     const webrtc = new WebRTCConnection({

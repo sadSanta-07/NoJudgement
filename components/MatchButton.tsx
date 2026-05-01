@@ -18,22 +18,19 @@ export default function MatchButton({ level, topic, userId }: Props) {
   const socketRef = useRef<Socket | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    return () => {
-      socketRef.current?.disconnect();
-    };
-  }, []);
-
   const startSearch = async () => {
     setStatus("searching");
 
     const socket = getSocket();
     socketRef.current = socket;
 
-    socket.on("connect", () => {
-
+    if (socket.connected) {
       socket.emit("join_queue", { userId, level, topic });
-    });
+    } else {
+      socket.once("connect", () => {
+        socket.emit("join_queue", { userId, level, topic });
+      });
+    }
 
     socket.on("matched", async ({ partnerId, roomId }) => {
       console.log("matched event received:", { partnerId, roomId });
@@ -43,6 +40,8 @@ export default function MatchButton({ level, topic, userId }: Props) {
         setStatus("idle");
         return;
       }
+      socket.off("matched");
+      socket.off("connect_error");
       setStatus("matched");
       await fetch("/api/match", {
         method: "POST",
@@ -60,9 +59,9 @@ export default function MatchButton({ level, topic, userId }: Props) {
       console.error("Socket connection failed");
     });
   };
+  
   const cancelSearch = () => {
     socketRef.current?.emit("leave_queue");
-    socketRef.current?.disconnect();
     setStatus("idle");
   };
 
