@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { useRouter } from "next/navigation";
+import { getSocket } from "@/lib/socket-client";
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL!;
 
@@ -26,26 +27,31 @@ export default function MatchButton({ level, topic, userId }: Props) {
   const startSearch = async () => {
     setStatus("searching");
 
-    const socket = io(SOCKET_URL, { transports: ["websocket"] });
+    const socket = getSocket();
     socketRef.current = socket;
 
-    socket.on("connect", async () => {
-      const res = await fetch("/api/match", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ level, topic }),
-      });
+    socket.on("connect", () => {
 
-      const data = await res.json();
-      const roomId = data.session.id;
-      socket.emit("join_queue", { userId, level, topic, roomId: data.isUser2 ? roomId : null });
+      socket.emit("join_queue", { userId, level, topic });
     });
 
-    socket.on("matched", ({ partnerId, roomId: emittedRoomId }) => {
+    socket.on("matched", async ({ partnerId, roomId }) => {
+      console.log("matched event received:", { partnerId, roomId });
+
+      if (!roomId) {
+        console.error("roomId is undefined — socket server issue");
+        setStatus("idle");
+        return;
+      }
       setStatus("matched");
-      // Small delay so user sees "Matched!" before redirect
+      await fetch("/api/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level, topic, partnerId, roomId }),
+      });
+
       setTimeout(() => {
-        router.push(`/room/${emittedRoomId || partnerId}`);
+        router.push(`/room/${roomId}`);
       }, 1000);
     });
 
@@ -54,7 +60,6 @@ export default function MatchButton({ level, topic, userId }: Props) {
       console.error("Socket connection failed");
     });
   };
-
   const cancelSearch = () => {
     socketRef.current?.emit("leave_queue");
     socketRef.current?.disconnect();
