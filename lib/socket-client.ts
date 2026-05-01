@@ -4,9 +4,8 @@ let socket: Socket | null = null;
 let currentRoom: string | null = null;
 
 export function getSocket(forRoom?: string): Socket {
-  // If switching rooms, disconnect old socket and create fresh one
   if (forRoom && currentRoom && currentRoom !== forRoom) {
-    console.log("🔄 New room — resetting socket");
+    console.log("New room — resetting socket");
     socket?.disconnect();
     socket = null;
   }

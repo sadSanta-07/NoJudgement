@@ -59,7 +59,7 @@ export default function PostCallPage() {
       {/* Filler words */}
       <div className="w-full bg-orange-50 rounded-xl p-4">
         <p className="text-sm text-orange-700">
-          🗣️ Filler words used: <strong>{analysis.fillerWords}</strong>
+          Filler words used: <strong>{analysis.fillerWords}</strong>
           {analysis.fillerWords > 5 ? " — try to reduce these!" : " — good job!"}
         </p>
       </div>

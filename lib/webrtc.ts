@@ -27,7 +27,7 @@ export class WebRTCConnection {
   private isCaller: boolean = false;
   private iceCandidateBuffer: RTCIceCandidateInit[] = [];
   private remoteDescSet: boolean = false;
-  private destroyed: boolean = false; // track destruction
+  private destroyed: boolean = false;
   private joinedAt: number = 0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,7 +95,6 @@ export class WebRTCConnection {
   }
 
   private setupSocketListeners() {
-    // Store named handlers so we remove only THIS instance's listeners
     this.handlers["room_role"] = async ({ role }: { role: "caller" | "callee" }) => {
       if (this.destroyed) return;
       console.log(`Role assigned: ${role}`);
@@ -145,7 +144,7 @@ export class WebRTCConnection {
 
     this.handlers["peer_left"] = () => {
       if (Date.now() - this.joinedAt < 2000) {
-        console.warn("⚠️ Ignoring stale peer_left event");
+        console.warn("Ignoring stale peer_left event");
         return;
       }
       console.log("Peer left");

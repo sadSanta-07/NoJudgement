@@ -11,8 +11,6 @@ export async function POST(req: NextRequest) {
     if (!audioFile) {
       return Response.json({ error: "No audio file" }, { status: 400 });
     }
-
-    // Convert to base64
     const audioBuffer = await audioFile.arrayBuffer();
     const base64Audio = Buffer.from(audioBuffer).toString("base64");
     const mimeType = audioFile.type || "audio/webm";
@@ -44,8 +42,6 @@ Rules:
     ]);
 
     const text = result.response.text().trim();
-
-    // Strip markdown if Gemini adds it anyway
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
@@ -57,6 +53,6 @@ Rules:
       isEnglish: true,
       englishScore: 100,
       warning: null
-    }); // return valid fallback instead of 500
+    });
   }
 }
