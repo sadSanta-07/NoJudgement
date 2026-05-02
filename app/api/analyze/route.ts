@@ -52,8 +52,10 @@ Respond ONLY with this JSON:
     const text = completion.choices[0]?.message?.content || "";
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
+    const nonLatinRatio = (transcript.match(/[^\x00-\x7F]/g) || []).length / (transcript.length || 1);
+    const englishScore = Math.round((1 - nonLatinRatio) * 100);
 
-    return Response.json(parsed);
+    return Response.json({ ...parsed, englishScore });
   } catch (err) {
     console.error("Analysis error:", err);
     return Response.json({

@@ -4,7 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
@@ -14,34 +14,48 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String   @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
 
-  accounts      Account[]
-  sessions      Session[]
+  points         Int       @default(100) // starts at 100, cumulative
+  streak         Int       @default(0)
+  lastActiveDate DateTime?
 
-sessionsAsUser1 MatchSession[] @relation("User1")
-sessionsAsUser2 MatchSession[] @relation("User2")
+  accounts          Account[]
+  sessions          Session[]
+  sessionsAsUser1   MatchSession[]     @relation("User1")
+  sessionsAsUser2   MatchSession[]     @relation("User2")
+  pointTransactions PointTransaction[]
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
+}
+
+model PointTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int // positive or negative
+  reason    String // "session_complete", "left_early", "non_english", "good_rating"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -61,8 +75,8 @@ model MatchSession {
   id        String   @id @default(cuid())
   user1Id   String
   user2Id   String?
-  status    String   // "waiting" | "active" | "ended"
-  level     String  @default("beginner")  // "beginner" | "intermediate" | "advanced"
+  status    String // "waiting" | "active" | "ended"
+  level     String   @default("beginner") // "beginner" | "intermediate" | "advanced"
   topic     String   @default("casual") // "casual" | "business" | "travel" | "interview" | "debate"
   createdAt DateTime @default(now())
 
