@@ -72,7 +72,7 @@ export default function Home() {
         <motion.p
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }} className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-8">
+          transition={{ delay: 0.3 }} className="text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mb-8 mt-2.5">
           Practice in real-time with people and AI. No judgment. Just growth.
         </motion.p>
 
@@ -82,10 +82,10 @@ export default function Home() {
           transition={{ delay: 0.4 }}
           className="flex gap-4"
         >
-          <div className="flex gap-4">
+          {/* <div className="flex gap-4">
             <LoginButton label="Start Practicing" />
             <LoginButton label="Login with Google" />
-          </div>
+          </div> */}
         </motion.div>
         <div className="w-full max-w-3xl mt-6">
           <AICard />
