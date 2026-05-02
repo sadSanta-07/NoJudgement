@@ -48,7 +48,7 @@ export default function Home() {
         initial="hidden"
         animate="show"
         variants={stagger}
-        className="min-h-[80vh] flex flex-col items-center text-center px-6 pt-20 pb-10"
+        className="min-h-[80vh] flex flex-col items-center text-center px-6 pt-35 pb-10"
       >
 
 

@@ -21,7 +21,7 @@ export default function Footer() {
 
         {/* Text */}
         <p className="text-gray-400 text-sm tracking-wide">
-          © 2026 NoJudgment. Built with Love
+         Built with Love
         </p>
 
       </div>
