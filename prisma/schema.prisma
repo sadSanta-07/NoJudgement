@@ -24,6 +24,8 @@ model User {
   streak         Int       @default(0)
   lastActiveDate DateTime?
 
+  coachMessages CoachMessage[]
+
   accounts          Account[]
   sessions          Session[]
   sessionsAsUser1   MatchSession[]     @relation("User1")
@@ -38,6 +40,16 @@ model PointTransaction {
   userId    String
   amount    Int // positive or negative
   reason    String // "session_complete", "left_early", "non_english", "good_rating"
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CoachMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String   // "user" | "assistant"
+  content   String
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
