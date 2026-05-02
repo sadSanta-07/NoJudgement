@@ -17,6 +17,9 @@ export async function POST(req: Request) {
 
   if (!user) return Response.json({ error: "User not found" }, { status: 404 });
 
+  if (user.isBanned) {
+  return Response.json({ error: "Account suspended" }, { status: 403 });
+}
   const existing = await prisma.matchSession.findFirst({
     where: { id: roomId },
   });

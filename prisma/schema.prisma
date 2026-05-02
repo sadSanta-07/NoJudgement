@@ -27,6 +27,10 @@ model User {
   coachMessages CoachMessage[]
   sessionAnalyses SessionAnalysis[]
 
+  isBanned      Boolean  @default(false)
+  reports       Report[] @relation("ReportedUser")
+  reportsMade   Report[] @relation("Reporter")
+
   accounts          Account[]
   sessions          Session[]
   sessionsAsUser1   MatchSession[]     @relation("User1")
@@ -34,6 +38,18 @@ model User {
   pointTransactions PointTransaction[]
 
   createdAt DateTime @default(now())
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  reporterId  String
+  reportedId  String
+  reason      String
+  sessionId   String?
+  createdAt   DateTime @default(now())
+
+  reporter User @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported User @relation("ReportedUser", fields: [reportedId], references: [id], onDelete: Cascade)
 }
 
 model PointTransaction {
