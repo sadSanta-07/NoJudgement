@@ -25,6 +25,7 @@ model User {
   lastActiveDate DateTime?
 
   coachMessages CoachMessage[]
+  sessionAnalyses SessionAnalysis[]
 
   accounts          Account[]
   sessions          Session[]
@@ -94,4 +95,22 @@ model MatchSession {
 
   user1 User  @relation("User1", fields: [user1Id], references: [id])
   user2 User? @relation("User2", fields: [user2Id], references: [id])
+}
+
+model SessionAnalysis {
+  id           String   @id @default(cuid())
+  userId       String
+  sessionId    String?
+  fluency      Int
+  clarity      Int
+  helpfulness  Int
+  fillerWords  Int
+  feedback     String
+  strongPoints String
+  improvePoints String
+  englishScore Int      @default(100)
+  durationSecs Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

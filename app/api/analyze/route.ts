@@ -1,13 +1,15 @@
 import Groq from "groq-sdk";
 import { NextRequest } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { prisma } from "@/lib/prisma";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
-});
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export async function POST(req: NextRequest) {
   try {
-    const { transcript, durationSeconds } = await req.json();
+    const session = await getServerSession(authOptions);
+    const { transcript, durationSeconds, sessionId } = await req.json();
 
     if (!transcript || transcript.trim().length < 10) {
       return Response.json({
@@ -15,6 +17,7 @@ export async function POST(req: NextRequest) {
         clarity: 0,
         helpfulness: 0,
         fillerWords: 0,
+        englishScore: 100,
         feedback: "Not enough speech detected to analyze.",
         strongPoints: "You showed up and practiced!",
         improvePoints: "Try to speak for longer next time.",
@@ -55,7 +58,32 @@ Respond ONLY with this JSON:
     const nonLatinRatio = (transcript.match(/[^\x00-\x7F]/g) || []).length / (transcript.length || 1);
     const englishScore = Math.round((1 - nonLatinRatio) * 100);
 
-    return Response.json({ ...parsed, englishScore });
+    const result = { ...parsed, englishScore, durationSecs: durationSeconds };
+    if (session?.user?.email) {
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email },
+      });
+
+      if (user) {
+        await prisma.sessionAnalysis.create({
+          data: {
+            userId: user.id,
+            sessionId: sessionId || null,
+            fluency: parsed.fluency,
+            clarity: parsed.clarity,
+            helpfulness: parsed.helpfulness,
+            fillerWords: parsed.fillerWords,
+            feedback: parsed.feedback,
+            strongPoints: parsed.strongPoints,
+            improvePoints: parsed.improvePoints,
+            englishScore,
+            durationSecs: durationSeconds,
+          },
+        });
+      }
+    }
+
+    return Response.json(result);
   } catch (err) {
     console.error("Analysis error:", err);
     return Response.json({
@@ -63,6 +91,7 @@ Respond ONLY with this JSON:
       clarity: 5,
       helpfulness: 5,
       fillerWords: 0,
+      englishScore: 100,
       feedback: "Could not analyze session.",
       strongPoints: "Keep practicing!",
       improvePoints: "Speak clearly and in English.",
