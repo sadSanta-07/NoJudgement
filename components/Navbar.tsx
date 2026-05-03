@@ -1,9 +1,12 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import LoginButton from "./LoginButton";
 import { motion } from "framer-motion";
 
 export default function Navbar() {
+  const { data: session } = useSession();
+
   return (
     <motion.header
       initial={{ y: -60, opacity: 0 }}
@@ -14,7 +17,6 @@ export default function Navbar() {
       <div className="flex items-center justify-between px-6 py-3 rounded-2xl 
       backdrop-blur-xl bg-white/60 border border-white/20 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
 
-        {/* LOGO */}
         <motion.div
           whileHover={{ scale: 1.05 }}
           className="text-lg md:text-xl font-semibold tracking-tight 
@@ -24,9 +26,8 @@ export default function Navbar() {
           NoJudgment
         </motion.div>
 
-        {/* CENTER LINKS */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
 
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
           {[
             { name: "About", id: "about" },
             { name: "Modes", id: "modes" },
@@ -35,36 +36,34 @@ export default function Navbar() {
             <a
               key={item.name}
               href={`#${item.id}`}
-              className="relative text-black/80 hover:text-black transition"
+              className="relative group text-black/80 hover:text-black transition"
             >
               {item.name}
 
-              {/* modern underline */}
               <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-black transition-all duration-300 group-hover:w-full" />
             </a>
           ))}
-
         </nav>
 
-        {/* RIGHT SIDE */}
         <div className="flex items-center gap-3">
+          {!session ? (
+            <>
 
-          {/* ghost login */}
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <button className="text-sm px-4 py-2 rounded-full text-black/70 hover:text-black transition">
-              Login
-            </button>
-          </motion.div>
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <LoginButton label="Login" variant="ghost" />
+              </motion.div>
 
-          {/* primary CTA */}
-          <motion.div whileHover={{ scale: 1.05 }}>
-            <button className="text-sm px-5 py-2 rounded-full 
-            bg-black text-white hover:bg-black/90 transition shadow-md">
-              Get Started
-            </button>
-          </motion.div>
-
+              <motion.div whileHover={{ scale: 1.05 }}>
+                <LoginButton label="Get Started" variant="primary" />
+              </motion.div>
+            </>
+          ) : (
+            <motion.div whileHover={{ scale: 1.02 }}>
+              <LoginButton />
+            </motion.div>
+          )}
         </div>
+
       </div>
     </motion.header>
   );
