@@ -155,58 +155,94 @@ export default function RoomPage() {
   const formatTime = (s: number) =>
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6">
-      <audio ref={remoteAudioRef} autoPlay />
+return (
+  <div className="flex flex-col items-center justify-center min-h-screen gap-6 bg-[#f7f7fb]">
 
-      {/* English warning banner */}
-      {warning && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
-          ⚠️ {warning}
-        </div>
-      )}
+    <audio ref={remoteAudioRef} autoPlay />
 
-      {callState === "connecting" && (
-        <p className="text-gray-500">Connecting to partner...</p>
-      )}
-
-      {callState === "connected" && (
-        <>
-          <p className="text-green-600 font-bold">Live Practice</p>
-          <p className="text-2xl font-mono">{formatTime(duration)}</p>
-
-          {/* English score indicator */}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-gray-500">English score:</span>
-            <span className={englishScore >= 60 ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
-              {englishScore}%
-            </span>
-          </div>
-        </>
-      )}
-
-      {callState === "ended" && (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-gray-500">Call ended</p>
-          {analyzing && <p className="text-blue-500 text-sm">Analyzing your session...</p>}
-        </div>
-      )}
-
-      <div className="flex gap-4">
-        <button
-          onClick={handleMute}
-          className={`px-4 py-2 rounded-full ${isMuted ? "bg-red-500 text-white" : "bg-gray-200"}`}
-        >
-          {isMuted ? "Unmute" : "Mute"}
-        </button>
-
-        <button
-          onClick={handleLeave}
-          className="bg-red-600 text-white px-4 py-2 rounded-full"
-        >
-          Leave
-        </button>
+    {/* English warning banner */}
+    {warning && (
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-bounce">
+        ⚠️ {warning}
       </div>
+    )}
+
+    {/* CONNECTING */}
+    {callState === "connecting" && (
+      <p className="text-gray-500">Connecting to partner...</p>
+    )}
+
+    {/* CONNECTED */}
+    {callState === "connected" && (
+      <div className="flex flex-col items-center gap-4">
+
+        {/* 🔥 TOP BAR */}
+        <div className="flex items-center gap-3 bg-white px-6 py-2 rounded-full shadow border">
+          
+          {/* USERS ICON */}
+          <span className="text-blue-500 text-xl">👥</span>
+
+          {/* LIVE LABEL */}
+          <span className="text-green-600 font-semibold flex items-center gap-1">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            Live
+          </span>
+
+          {/* TIMER */}
+          <span className="font-mono text-gray-700 text-lg">
+            {formatTime(duration)}
+          </span>
+        </div>
+
+        {/* TITLE */}
+        <p className="text-green-600 font-bold">Live Practice</p>
+
+        {/* English score indicator */}
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-500">English score:</span>
+          <span
+            className={
+              englishScore >= 60
+                ? "text-green-600 font-bold"
+                : "text-red-500 font-bold"
+            }
+          >
+            {englishScore}%
+          </span>
+        </div>
+      </div>
+    )}
+
+    {/* ENDED */}
+    {callState === "ended" && (
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-gray-500">Call ended</p>
+        {analyzing && (
+          <p className="text-blue-500 text-sm">Analyzing your session...</p>
+        )}
+      </div>
+    )}
+
+    {/* CONTROLS */}
+    <div className="flex gap-4 mt-4">
+      <button
+        onClick={handleMute}
+        className={`px-5 py-2 rounded-full transition ${
+          isMuted
+            ? "bg-red-500 text-white"
+            : "bg-white border text-gray-700 shadow"
+        }`}
+      >
+        {isMuted ? "Unmute" : "Mute"}
+      </button>
+
+      <button
+        onClick={handleLeave}
+        className="bg-red-600 text-white px-5 py-2 rounded-full shadow"
+      >
+        Leave
+      </button>
     </div>
-  );
+  </div>
+);
 }
