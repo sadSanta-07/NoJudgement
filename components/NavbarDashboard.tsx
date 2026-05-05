@@ -8,7 +8,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  const currentPage = pathname.split("/")[2] || "dashboard";
+  const segments = pathname?.split("/") || [];
+ const currentPage = segments[2] || "dashboard";
 
   const pageTitles: Record<string, string> = {
     dashboard: `Good morning, ${session?.user?.name?.split(" ")[0] || "User"}!`,
