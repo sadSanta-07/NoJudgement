@@ -1,6 +1,7 @@
 "use client";
 
 import { Flame, Zap } from "lucide-react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 
@@ -53,7 +54,7 @@ export default function Navbar() {
         {/* USER */}
         <div className="w-9 h-9 md:w-11 md:h-11 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
           {session?.user?.image ? (
-            <img
+            <Image
               src={session.user.image}
               alt="User"
               className="w-full h-full object-cover"
