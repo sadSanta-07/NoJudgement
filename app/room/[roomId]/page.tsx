@@ -9,7 +9,8 @@ import { getSocket } from "@/lib/socket-client";
 import { useAudioRecorder } from "@/lib/useAudioRecorder";
 
 export default function RoomPage() {
-  const { roomId } = useParams<{ roomId: string }>();
+  const params = useParams() as { roomId: string };
+  const roomId = params.roomId;
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -49,56 +50,56 @@ export default function RoomPage() {
     if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
   }, [stopRecorder]);
 
-const handleCallEnd = useCallback(async () => {
-  stopRecorder();
-  if (timerRef.current) clearInterval(timerRef.current);
-  setCallState("ended");
-  setAnalyzing(true);
+  const handleCallEnd = useCallback(async () => {
+    stopRecorder();
+    if (timerRef.current) clearInterval(timerRef.current);
+    setCallState("ended");
+    setAnalyzing(true);
 
-  const transcript = getFullTranscript();
-  const sessionDuration = durationRef.current;
+    const transcript = getFullTranscript();
+    const sessionDuration = durationRef.current;
 
-  if (sessionDuration >= 120) {
-    await awardPoints("session_complete");
-  } else if (sessionDuration > 0) {
-    await awardPoints("left_early");
-  }
-
-  try {
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        transcript: transcript || "",
-        durationSeconds: sessionDuration,
-      }),
-    });
-
-    const text = await res.text();
-    if (!text) throw new Error("Empty response");
-
-    const analysis = JSON.parse(text);
-
-    if (analysis.englishScore !== undefined && analysis.englishScore < 60) {
-      await awardPoints("non_english");
+    if (sessionDuration >= 120) {
+      await awardPoints("session_complete");
+    } else if (sessionDuration > 0) {
+      await awardPoints("left_early");
     }
 
-    sessionStorage.setItem("callAnalysis", JSON.stringify(analysis));
-    sessionStorage.setItem("callDuration", String(sessionDuration));
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcript: transcript || "",
+          durationSeconds: sessionDuration,
+        }),
+      });
 
-    router.push("/post-call");
-  } catch (err) {
-    console.error("Analysis failed:", err);
-    sessionStorage.setItem("callAnalysis", JSON.stringify({
-      fluency: 5, clarity: 5, helpfulness: 5,
-      fillerWords: 0,
-      feedback: "Analysis unavailable.",
-      strongPoints: "Keep practicing!",
-      improvePoints: "Speak clearly and in English.",
-    }));
-    router.push("/post-call");
-  }
-}, [stopRecorder, getFullTranscript, router]);
+      const text = await res.text();
+      if (!text) throw new Error("Empty response");
+
+      const analysis = JSON.parse(text);
+
+      if (analysis.englishScore !== undefined && analysis.englishScore < 60) {
+        await awardPoints("non_english");
+      }
+
+      sessionStorage.setItem("callAnalysis", JSON.stringify(analysis));
+      sessionStorage.setItem("callDuration", String(sessionDuration));
+
+      router.push("/post-call");
+    } catch (err) {
+      console.error("Analysis failed:", err);
+      sessionStorage.setItem("callAnalysis", JSON.stringify({
+        fluency: 5, clarity: 5, helpfulness: 5,
+        fillerWords: 0,
+        feedback: "Analysis unavailable.",
+        strongPoints: "Keep practicing!",
+        improvePoints: "Speak clearly and in English.",
+      }));
+      router.push("/post-call");
+    }
+  }, [stopRecorder, getFullTranscript, router]);
 
   useEffect(() => {
     if (!session?.user) return;
