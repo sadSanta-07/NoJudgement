@@ -114,8 +114,8 @@ const userId = (session?.user as any)?.id || session?.user?.email;
         {/* MATCH BUTTON */}
         <div className="mt-12 pt-8 border-t border-gray-50 flex justify-center">
           <MatchButton
-            level={level.toLowerCase()}   // ✅ normalized
-            topic={topic.toLowerCase()}   // ✅ normalized
+            level={level.toLowerCase()}  
+            topic={topic.toLowerCase()}  
             userId={userId}
             label="Search for partner"
           />

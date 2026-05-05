@@ -20,7 +20,6 @@ export default function AICoachPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ LOAD CHAT HISTORY
   useEffect(() => {
     const loadMessages = async () => {
       try {
@@ -35,13 +34,11 @@ export default function AICoachPage() {
     loadMessages();
   }, []);
 
-  // ✅ SEND MESSAGE
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
     const userMessage = input.trim();
 
-    // optimistic UI
     setMessages((prev) => [
       ...prev,
       { role: "user", content: userMessage },
