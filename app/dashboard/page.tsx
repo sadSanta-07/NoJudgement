@@ -77,7 +77,7 @@ export default function Dashboard() {
         setError(null);
         const dashboardData = await fetchDashboardData();
         setData(dashboardData);
-        console.log("✅ Dashboard loaded");
+        console.log(" Dashboard loaded");
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to load dashboard";
         setError(message);
@@ -94,11 +94,11 @@ export default function Dashboard() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        console.log("📊 Dashboard: Page visible - auto-refreshing...");
+        console.log(" Dashboard: Page visible - auto-refreshing...");
         fetchDashboardData()
           .then((dashboardData) => {
             setData(dashboardData);
-            console.log("✅ Dashboard: Auto-refresh complete");
+            console.log(" Dashboard: Auto-refresh complete");
           })
           .catch((err) => console.error("Dashboard auto-refresh error:", err));
       }

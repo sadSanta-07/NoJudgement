@@ -47,7 +47,7 @@ export default function Heatmap() {
         const { heatmap: heatData, streak: streakVal } = await fetchHeatmapData();
         setHeatmap(heatData);
         setStreak(streakVal);
-        console.log("✅ Heatmap loaded");
+        console.log(" Heatmap loaded");
       } catch (err) {
         setError("Failed to load heatmap");
         console.error(err);
@@ -63,12 +63,12 @@ export default function Heatmap() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        console.log("🔥 Heatmap: Page visible - auto-refreshing...");
+        console.log(" Heatmap: Page visible - auto-refreshing...");
         fetchHeatmapData()
           .then(({ heatmap: heatData, streak: streakVal }) => {
             setHeatmap(heatData);
             setStreak(streakVal);
-            console.log("✅ Heatmap: Auto-refresh complete");
+            console.log(" Heatmap: Auto-refresh complete");
           })
           .catch((err) => console.error("Heatmap auto-refresh error:", err));
       }
