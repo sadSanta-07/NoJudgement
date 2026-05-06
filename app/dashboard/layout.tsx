@@ -2,7 +2,7 @@
 
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/NavbarDashboard";
-import Footer from "@/components/Footer";
+
 
 export default function DashboardLayout({
   children,
@@ -28,8 +28,6 @@ export default function DashboardLayout({
           {children}
         </main>
 
-        {/* FOOTER (NOW CORRECT) */}
-        <Footer />
 
       </div>
     </div>

@@ -2,68 +2,144 @@
 
 import { useEffect, useState } from "react";
 import MatchButton from "@/components/MatchButton";
+import Heatmap from "@/components/Heatmap";
+import FocusAreas from "@/components/FocusAreas";
 import {
   TrendingUp,
   Clock,
   Target,
-  BookOpen,
 } from "lucide-react";
 
-interface DashboardData {
-  user: {
-    name: string;
-    image: string;
-    points: number;
-    streak: number;
-  };
-  stats: {
-    totalSessions: number;
-    totalSpeakingSeconds: number;
-    avgFluency: number;
-    avgClarity: number;
-    avgEnglishScore: number;
-    avgFillerWords: number;
-    weakAreas: string[];
-  };
-  recentSessions: any[];
+interface User {
+  name: string;
+  image: string;
+  points: number;
+  streak: number;
+}
+
+interface Stats {
+  totalSessions: number;
+  totalSpeakingSeconds: number;
+  avgFluency: number;
+  avgClarity: number;
+  avgEnglishScore: number;
+  avgFillerWords: number;
+  weakAreas: string[];
+}
+
+interface RecentSession {
+  id: string;
+  fluency: number;
+  clarity: number;
+  helpfulness: number;
+  durationSecs: number;
+  feedback: string;
+  englishScore: number;
+  createdAt: string;
+}
+
+interface RecentTransaction {
+  id: string;
+  amount: number;
+  reason: string;
+  createdAt: string;
+}
+
+interface DashboardResponse {
+  user: User;
+  stats: Stats;
+  graphData: any[];
+  recentSessions: RecentSession[];
+  recentTransactions: RecentTransaction[];
+}
+
+async function fetchDashboardData(): Promise<DashboardResponse> {
+  const response = await fetch("/api/dashboard");
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+  
+  return response.json();
 }
 
 export default function Dashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [heatmap, setHeatmap] = useState<any[]>([]);
+  const [data, setData] = useState<DashboardResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Initial load
   useEffect(() => {
-    const fetchAll = async () => {
-      const [d, h] = await Promise.all([
-        fetch("/api/dashboard"),
-        fetch("/api/heatmap"),
-      ]);
-
-      const dash = await d.json();
-      const heat = await h.json();
-
-      setData(dash);
-      setHeatmap(heat.heatmap);
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const dashboardData = await fetchDashboardData();
+        setData(dashboardData);
+        console.log(" Dashboard loaded");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to load dashboard";
+        setError(message);
+        console.error("Dashboard error:", err);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchAll();
+    load();
   }, []);
 
-  if (!data) return <p className="p-10">Loading...</p>;
+  // Auto-refetch when user returns to this page (after a call)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log(" Dashboard: Page visible - auto-refreshing...");
+        fetchDashboardData()
+          .then((dashboardData) => {
+            setData(dashboardData);
+            console.log(" Dashboard: Auto-refresh complete");
+          })
+          .catch((err) => console.error("Dashboard auto-refresh error:", err));
+      }
+    };
 
-  const hours = (data.stats.totalSpeakingSeconds / 3600).toFixed(1);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  if (loading) return <p className="p-10">Loading...</p>;
+
+  if (error)
+    return (
+      <div className="p-10 bg-red-50 text-red-700 rounded-lg">
+        <p>Error: {error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
+        >
+          Retry
+        </button>
+      </div>
+    );
+
+  if (!data) return <p className="p-10">No data available</p>;
+
+  const minutes = Math.floor(data.stats.totalSpeakingSeconds / 60);
 
   return (
     <div className="p-6 md:p-10 space-y-8 bg-[#f7f7fb] min-h-screen">
 
       {/* HEADER */}
       <div className="bg-gradient-to-r from-[#FFA133] to-[#3B5BFF] rounded-3xl p-8 text-white shadow-lg">
-        <h2 className="text-3xl font-bold mb-2">
-          Welcome back, {data.user.name}
-        </h2>
-        <p className="text-white/80">
-          You've spoken {hours} hours so far. Keep going.
-        </p>
+        <div>
+          <h2 className="text-3xl font-bold mb-2">
+            Welcome back, {data.user.name}
+          </h2>
+          <p className="text-white/80">
+            You've spoken {minutes} minutes so far. Keep going.
+          </p>
+        </div>
 
         <div className="mt-5">
           <MatchButton
@@ -81,7 +157,7 @@ export default function Dashboard() {
         <StatCard
           icon={<Clock />}
           label="Speaking Time"
-          value={`${hours}h`}
+          value={`${minutes}m`}
         />
 
         <StatCard
@@ -109,72 +185,26 @@ export default function Dashboard() {
         {/* LEFT */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* STREAK + HEATMAP */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Your Streak</h3>
-              <span className="text-orange-500 font-semibold">
-                ⚡ {data.user.streak} days
-              </span>
-            </div>
-
-            {/* FIXED HEATMAP */}
-            <div className="overflow-x-auto">
-              <div className="grid grid-rows-7 grid-flow-col gap-1 w-max">
-                {heatmap.map((d, i) => {
-                  let color = "bg-gray-100";
-
-                  if (d.sessions > 0) color = "bg-[#FFE2CC]";
-                  if (d.sessions > 2) color = "bg-[#FFB680]";
-                  if (d.sessions > 4) color = "bg-[#FFA133]";
-                  if (d.sessions > 6) color = "bg-[#3B5BFF]";
-
-                  return (
-                    <div
-                      key={i}
-                      className={`w-3 h-3 rounded-sm ${color}`}
-                      title={`${d.date} • ${d.sessions} sessions`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+          {/* HEATMAP COMPONENT */}
+          <Heatmap />
 
         </div>
 
         {/* RIGHT */}
         <div className="space-y-6">
 
-          {/* FOCUS AREAS */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <BookOpen className="mr-2 text-blue-500" />
-              Focus Areas
-            </h3>
-
-            {data.stats.weakAreas.length === 0 ? (
-              <p className="text-sm text-gray-400">
-                No major weaknesses detected 🎉
-              </p>
-            ) : (
-              data.stats.weakAreas.map((area, i) => (
-                <div key={i} className="mb-3">
-                  <p className="text-sm font-medium">{area}</p>
-                  <div className="h-2 bg-gray-100 rounded-full mt-1">
-                    <div
-                      className="h-full bg-blue-500 rounded-full"
-                      style={{ width: "60%" }}
-                    />
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          {/* FOCUS AREAS COMPONENT */}
+          <FocusAreas
+            weakAreas={data.stats.weakAreas}
+            avgFluency={data.stats.avgFluency}
+            avgClarity={data.stats.avgClarity}
+            avgEnglishScore={data.stats.avgEnglishScore}
+            avgFillerWords={data.stats.avgFillerWords}
+          />
 
           {/* RECENT SESSIONS */}
           <div className="bg-white rounded-3xl p-6 shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-lg font-semibold mb-6">
               Recent Sessions
             </h3>
 
@@ -186,18 +216,27 @@ export default function Dashboard() {
               data.recentSessions.map((s, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center mb-3"
+                  className="flex items-center justify-between mb-5 pb-5 border-b last:border-b-0"
                 >
-                  <div>
-                    <p className="font-medium">
-                      Fluency {s.fluency} • Clarity {s.clarity}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(s.createdAt).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
+                      {data.user.name?.charAt(0) || "U"}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-800">
+                        {data.user.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Speaking • {Math.round(s.durationSecs / 60)}m ago
+                      </p>
+                    </div>
                   </div>
 
-                  <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                    s.helpfulness > 7
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}>
                     {s.helpfulness > 7 ? "Adv" : "Int"}
                   </span>
                 </div>
@@ -221,7 +260,7 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div className="bg-white p-6 rounded-2xl  shadow-lg text-center">
+    <div className="bg-white p-6 rounded-2xl shadow-lg text-center">
       <div className="mb-2 flex justify-center text-blue-500">
         {icon}
       </div>
