@@ -112,11 +112,11 @@ export default function Reports() {
               <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
                 <ShieldCheck size={18} className="mr-3 text-green-500 shrink-0" /> Safe Conversations
               </label>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">AI Monitoring</span>
                 <span className="text-green-600">Active</span>
               </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">Environment</span>
                 <span className="text-gray-900 normal-case font-medium sm:font-bold sm:uppercase">
                   Respectful &amp; Helpful
@@ -129,13 +129,13 @@ export default function Reports() {
               <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
                 <AlertTriangle size={18} className="mr-3 text-orange-500 shrink-0" /> Report an Issue
               </label>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">Status</span>
                 <span className={`normal-case font-medium sm:font-bold sm:uppercase ${pendingCount > 0 ? "text-orange-500" : "text-gray-900"}`}>
                   {pendingLabel}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">Last Reviewed</span>
                 <span className="text-gray-900">Today</span>
               </div>
@@ -155,11 +155,11 @@ export default function Reports() {
               <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
                 <FileText size={18} className="mr-3 text-blue-500 shrink-0" /> Recent Safety Logs
               </label>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">Issues Detected</span>
                 <span className={logs.length > 0 ? "text-orange-500" : "text-green-600"}>{issuesLabel}</span>
               </div>
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 py-2">
+              <div className="flex items-center justify-between py-3">
                 <span className="text-gray-500">Sessions Reviewed</span>
                 <span className={`normal-case font-medium sm:font-bold sm:uppercase ${logs.length > 0 ? "text-orange-500" : "text-gray-900"}`}>
                   {sessionsLabel}
@@ -174,7 +174,7 @@ export default function Reports() {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 py-2 border-t border-gray-50"
+                    className="flex items-center justify-between py-3 px-4 rounded-2xl bg-black/[0.02] border border-black/[0.04]"
                   >
                     <span className="text-gray-400 normal-case font-normal tracking-normal">
                       User <span className="font-mono text-xs text-gray-600">{log.userId}</span> — {log.reason}
@@ -195,21 +195,21 @@ export default function Reports() {
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={(e) => { if (e.target === e.currentTarget && status !== "loading") setShowModal(false); }}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+              className="bg-white/90 backdrop-blur-2xl rounded-[2rem] border border-white/50 shadow-[0_10px_50px_rgba(0,0,0,0.12)] w-full max-w-md overflow-hidden"
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-black/[0.04]">
                 <div className="flex items-center gap-2">
                   <AlertTriangle size={18} className="text-orange-500" />
                   <h2 className="text-base font-semibold text-gray-900">File a Report</h2>
@@ -247,7 +247,7 @@ export default function Reports() {
                         placeholder="e.g. user_abc123"
                         value={reportState.reportedUserId}
                         onChange={(e) => setReportState((s) => ({ ...s, reportedUserId: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
+                        className="w-full px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
                         disabled={status === "loading"}
                       />
                     </div>
@@ -261,7 +261,7 @@ export default function Reports() {
                         <select
                           value={reportState.reason}
                           onChange={(e) => setReportState((s) => ({ ...s, reason: e.target.value as Reason }))}
-                          className="w-full appearance-none px-4 py-2.5 pr-10 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 bg-white transition-all font-normal normal-case tracking-normal"
+                          className="w-full appearance-none px-4 py-2.5 pr-10 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 bg-white transition-all font-normal normal-case tracking-normal"
                           disabled={status === "loading"}
                         >
                           <option value="" disabled>Select a reason…</option>
@@ -283,7 +283,7 @@ export default function Reports() {
                         placeholder="e.g. sess_xyz789"
                         value={reportState.sessionId}
                         onChange={(e) => setReportState((s) => ({ ...s, sessionId: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
+                        className="w-full px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
                         disabled={status === "loading"}
                       />
                     </div>
@@ -306,7 +306,7 @@ export default function Reports() {
                     <div className="flex gap-3 pt-1">
                       <button
                         onClick={() => { if (status !== "loading") { setShowModal(false); setStatus("idle"); setErrorMessage(""); } }}
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-gray-50 transition-all font-semibold normal-case tracking-normal"
+                        className="flex-1 px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] text-sm text-gray-500 hover:bg-gray-50 transition-all font-semibold normal-case tracking-normal"
                         disabled={status === "loading"}
                       >
                         Cancel

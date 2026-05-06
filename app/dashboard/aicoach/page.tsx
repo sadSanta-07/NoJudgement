@@ -70,13 +70,13 @@ export default function AICoachPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-6rem)] flex flex-col p-6">
+    <div className="h-[calc(100vh-6rem)] bg-[#f5f5f7] flex flex-col p-4 md:p-6">
 
       {/* CHAT CONTAINER */}
-      <div className="flex-1 bg-white rounded-3xl border border-[var(--color-border)] shadow-sm flex flex-col overflow-hidden">
+      <div className="flex-1 bg-white/80 backdrop-blur-2xl rounded-[2rem] border border-black/[0.04] shadow-[0_10px_40px_rgba(0,0,0,0.06)] flex flex-col overflow-hidden">
 
         {/* HEADER */}
-        <div className="px-6 py-4 border-b flex items-center justify-between bg-white/70 backdrop-blur">
+        <div className="px-6 py-4 border-b flex items-center justify-between bg-white/60 backdrop-blur-2xl">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FFA133] to-[#A5BBFC] flex items-center justify-center text-white">
               <Brain size={20} />
@@ -94,9 +94,6 @@ export default function AICoachPage() {
           <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 bg-[#A5BBFC]/20 px-3 py-1.5 rounded-lg">
               <Sparkles size={14} className="text-[#6F8EF6]" />
-              <span className="text-xs font-semibold text-[#6F8EF6]">
-                Smart Mode
-              </span>
             </div>
 
             <button className="p-2 hover:bg-[var(--color-neutral)] rounded-lg text-gray-400">
@@ -106,7 +103,7 @@ export default function AICoachPage() {
         </div>
 
         {/* MESSAGES */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-8">
           {messages.map((msg, i) => (
             <motion.div
               key={i}
@@ -117,13 +114,13 @@ export default function AICoachPage() {
               }`}
             >
               <div
-                className={`max-w-[75%] p-4 rounded-2xl ${
+                className={`max-w-[70%] px-5 py-3.5 rounded-[1.6rem] ${
                   msg.role === "user"
                     ? "bg-[#6F8EF6] text-white"
                     : "bg-[var(--color-neutral)] text-[var(--color-tertiary)]"
                 }`}
               >
-                <p className="text-sm leading-relaxed">{msg.content}</p>
+                <p className="text-[15px] leading-7 font-medium tracking-[-0.01em]">{msg.content}</p>
               </div>
             </motion.div>
           ))}
@@ -132,7 +129,11 @@ export default function AICoachPage() {
           {loading && (
             <div className="flex justify-start">
               <div className="bg-gray-100 px-4 py-2 rounded-xl text-sm text-gray-500">
-                Typing...
+                <div className="flex gap-1 px-4 py-3 rounded-2xl bg-black/[0.04]">
+  <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" />
+  <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-100" />
+  <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce delay-200" />
+</div>
               </div>
             </div>
           )}
