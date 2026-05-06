@@ -2,128 +2,214 @@
 
 import { User, Lock, Mic } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
-
-const containerVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut", staggerChildren: 0.1 },
-  },
-};
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3 },
+  },
 };
 
 export default function Settings() {
-  const [displayName, setDisplayName] = useState("Alex Johnson");
-  const [email, setEmail] = useState("alex@example.com");
-  const [defaultInput, setDefaultInput] = useState("MacBook Pro Mic");
+  const { data: session } = useSession();
+
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedMic, setSelectedMic] = useState("");
   const [noiseSuppression, setNoiseSuppression] = useState(true);
   const [profileVisibility, setProfileVisibility] = useState("Public");
 
+  useEffect(() => {
+    async function getDevices() {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        const allDevices = await navigator.mediaDevices.enumerateDevices();
+
+        const audioInputs = allDevices.filter(
+          (device) => device.kind === "audioinput"
+        );
+
+        setDevices(audioInputs);
+
+        if (audioInputs.length > 0) {
+          setSelectedMic(audioInputs[0].deviceId);
+        }
+      } catch (error) {
+        console.error("Microphone access denied:", error);
+      }
+    }
+
+    getDevices();
+  }, []);
+
   return (
     <motion.div
-      //variants={containerVariants}
       initial="hidden"
       animate="visible"
       className="w-full max-w-2xl mx-auto space-y-8 px-4 sm:px-6 lg:px-0"
     >
-      <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-sm">
-        <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-sm">
+        <div className="p-5 sm:p-8 space-y-8">
 
-          {/* Account Section */}
-          <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-3 sm:pb-4">
-              <User size={16} className="mr-3 text-blue-500 shrink-0" /> Account
+          <div className="flex items-center gap-4 border-b border-gray-100 pb-6">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+              {session?.user?.image ? (
+                <Image
+                  src={session.user.image}
+                  alt="Profile"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <User className="text-gray-500" size={28} />
+              )}
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {session?.user?.name || "User"}
+              </h2>
+
+              <p className="text-sm text-gray-500 break-all">
+                {session?.user?.email}
+              </p>
+            </div>
+          </div>
+
+          <motion.div
+            variants={sectionVariants}
+            className="space-y-4"
+          >
+            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-4">
+              <User
+                size={16}
+                className="mr-3 text-blue-500 shrink-0"
+              />
+              Account
             </label>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 py-2">
-              <span className="text-xs uppercase font-bold text-gray-400 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2">
+              <span className="text-xs uppercase font-bold text-gray-400">
                 Display Name
               </span>
+
               <input
                 type="text"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full sm:w-64 px-3 py-1.5 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
-                placeholder="Display Name"
+                value={session?.user?.name || ""}
+                disabled
+                className="w-full sm:w-64 px-3 py-2 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 py-2">
-              <span className="text-xs uppercase font-bold text-gray-400 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2">
+              <span className="text-xs uppercase font-bold text-gray-400">
                 Email
               </span>
+
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full sm:w-64 px-3 py-1.5 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition break-all sm:break-normal"
-                placeholder="Email"
+                value={session?.user?.email || ""}
+                disabled
+                className="w-full sm:w-64 px-3 py-2 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
               />
             </div>
           </motion.div>
 
-          {/* Audio Settings Section */}
-          <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-3 sm:pb-4">
-              <Mic size={16} className="mr-3 text-blue-500 shrink-0" /> Audio Settings
+          {/* AUDIO */}
+          <motion.div
+            variants={sectionVariants}
+            className="space-y-4"
+          >
+            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-4">
+              <Mic
+                size={16}
+                className="mr-3 text-blue-500 shrink-0"
+              />
+              Audio Settings
             </label>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 py-2">
-              <span className="text-xs uppercase font-bold text-gray-400 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2">
+              <span className="text-xs uppercase font-bold text-gray-400">
                 Default Input
               </span>
+
               <select
-                value={defaultInput}
-                onChange={(e) => setDefaultInput(e.target.value)}
-                className="w-full sm:w-64 px-3 py-1.5 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition bg-white"
+                value={selectedMic}
+                onChange={(e) => setSelectedMic(e.target.value)}
+                className="w-full sm:w-64 px-3 py-2 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white"
               >
-                <option>MacBook Pro Mic</option>
-                <option>External USB Mic</option>
-                <option>AirPods</option>
+                {devices.length > 0 ? (
+                  devices.map((device) => (
+                    <option
+                      key={device.deviceId}
+                      value={device.deviceId}
+                    >
+                      {device.label || "Unknown Microphone"}
+                    </option>
+                  ))
+                ) : (
+                  <option>No microphone detected</option>
+                )}
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 py-2">
-              <span className="text-xs uppercase font-bold text-gray-400 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2">
+              <span className="text-xs uppercase font-bold text-gray-400">
                 Noise Suppression
               </span>
+
               <button
                 role="switch"
                 aria-checked={noiseSuppression}
-                onClick={() => setNoiseSuppression((v) => !v)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                  noiseSuppression ? "bg-blue-500" : "bg-gray-200"
+                onClick={() =>
+                  setNoiseSuppression((v) => !v)
+                }
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  noiseSuppression
+                    ? "bg-blue-500"
+                    : "bg-gray-300"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                    noiseSuppression ? "translate-x-6" : "translate-x-1"
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    noiseSuppression
+                      ? "translate-x-6"
+                      : "translate-x-1"
                   }`}
                 />
               </button>
             </div>
           </motion.div>
 
-          {/* Privacy Section */}
-          <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-3 sm:pb-4">
-              <Lock size={16} className="mr-3 text-blue-500 shrink-0" /> Privacy
+          {/* PRIVACY */}
+          <motion.div
+            variants={sectionVariants}
+            className="space-y-4"
+          >
+            <label className="flex items-center text-xs uppercase font-bold text-gray-400 border-b border-gray-100 pb-4">
+              <Lock
+                size={16}
+                className="mr-3 text-blue-500 shrink-0"
+              />
+              Privacy
             </label>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 py-2">
-              <span className="text-xs uppercase font-bold text-gray-400 shrink-0">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-2">
+              <span className="text-xs uppercase font-bold text-gray-400">
                 Profile Visibility
               </span>
+
               <select
                 value={profileVisibility}
-                onChange={(e) => setProfileVisibility(e.target.value)}
-                className="w-full sm:w-64 px-3 py-1.5 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition bg-white"
+                onChange={(e) =>
+                  setProfileVisibility(e.target.value)
+                }
+                className="w-full sm:w-64 px-3 py-2 text-sm text-gray-900 font-medium border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 bg-white"
               >
                 <option>Public</option>
                 <option>Friends only</option>
@@ -131,7 +217,6 @@ export default function Settings() {
               </select>
             </div>
           </motion.div>
-
         </div>
       </div>
     </motion.div>
