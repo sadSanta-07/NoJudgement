@@ -141,10 +141,10 @@ export default function Sidebar() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{
-  type: "spring",
-  stiffness: 120,
- damping: 18,
-}}
+                type: "spring",
+                stiffness: 120,
+                damping: 18,
+              }}
               className="fixed top-0 left-0 w-[85%] max-w-[320px] h-full bg-white/90 backdrop-blur-2xl z-50 flex flex-col shadow-[0_10px_50px_rgba(0,0,0,0.12)]"
             >
               {/* HEADER */}
