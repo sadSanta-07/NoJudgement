@@ -1,243 +1,277 @@
-# NoJudgment - AI-Powered English Speaking Practice Platform
+# NoJudgment — AI-Powered English Speaking Platform
 
-<div align="center">
+<p align="center">
+  <img src="./public/banner.png" alt="NoJudgment Banner" />
+</p>
 
-![NoJudgment](https://img.shields.io/badge/NoJudgment-English%20Learning-blueviolet?style=flat-square)
-![Status](https://img.shields.io/badge/status-Beta-orange?style=flat-square)
-![Next.js](https://img.shields.io/badge/Next.js-16.2.4-black?style=flat-square&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
-![Postgres](https://img.shields.io/badge/PostgreSQL-14+-336791?style=flat-square&logo=postgresql)
+<p align="center">
 
-**Practice English speaking with real people and AI. No judgment. Just growth.**
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-336791?style=for-the-badge&logo=postgresql)
+![WebRTC](https://img.shields.io/badge/WebRTC-Realtime-green?style=for-the-badge)
+![AI Powered](https://img.shields.io/badge/AI-Groq%20%7C%20Llama3-orange?style=for-the-badge)
 
-</div>
+</p>
 
----
-
-## 🎯 Project Description
-
-**NoJudgment** is an AI-powered platform that helps non-native English speakers improve their conversational skills through real-time peer matching, intelligent AI coaching, and comprehensive session analytics.
-
-**Core Value Proposition**:
-- Practice with real people at your skill level (beginner/intermediate/advanced)
-- Get instant AI-powered feedback on your speaking
-- Track progress with detailed analytics (fluency, clarity, pronunciation)
-- Stay motivated with gamification (points, streaks, leaderboard)
-- Safe community with automatic moderation
-
-**Key Technologies**: WebRTC for peer-to-peer calls, Socket.io for real-time matchmaking, Groq AI (Llama 3.1) for session analysis and coaching, Next.js fullstack framework, PostgreSQL database.
+<p align="center">
+  Practice spoken English with real people and AI — without fear of judgment.
+</p>
 
 ---
 
-## 📁 Project Structure
+#  Overview
 
-```
-nojudgment/
-├── app/
-│   ├── page.tsx                          # Landing page
-│   ├── layout.tsx                        # Root layout
-│   ├── api/
-│   │   ├── analyze/route.ts              # Groq AI speech analysis
-│   │   ├── coach/route.ts                # AI coach multi-turn chat
-│   │   ├── match/route.ts                # Session matchmaking
-│   │   ├── points/route.ts               # Points & streak system
-│   │   ├── leaderboard/route.ts          # Global rankings
-│   │   ├── report/route.ts               # User reporting & auto-ban
-│   │   ├── dashboard/route.ts            # Aggregated user data
-│   │   ├── heatmap/route.ts              # 30-day performance heatmap
-│   │   └── auth/[...nextauth]/route.ts   # Google OAuth
-│   ├── dashboard/
-│   │   ├── page.tsx                      # Main dashboard
-│   │   ├── aicoach/page.tsx              # AI coaching interface
-│   │   ├── matchmaking/page.tsx          # Queue & matching UI
-│   │   ├── leaderboard/page.tsx          # Rankings display
-│   │   ├── practice/page.tsx             # Session history
-│   │   ├── reports/page.tsx              # Moderation dashboard
-│   │   └── settings/page.tsx             # User settings
-│   ├── room/[roomId]/page.tsx            # Live WebRTC call room
-│   └── post-call/page.tsx                # Session analysis display
-├── components/                           # Reusable React components
-├── lib/
-│   ├── prisma.ts                         # Prisma ORM singleton
-│   ├── socket-client.ts                  # Socket.io client factory
-│   ├── webrtc.ts                         # WebRTC peer connection class
-│   ├── useAudioRecorder.ts               # Audio recording hook
-│   └── points.ts                         # Point calculation helpers
-├── prisma/
-│   ├── schema.prisma                     # Database schema (8 models)
-│   └── migrations/                       # Database version history
-├── server.js                             # Separate Node.js Socket.io server
-└── package.json, tsconfig.json, next.config.ts
-```
+**NoJudgment** is an AI-powered English speaking practice platform designed for non-native speakers to improve communication confidence through real-time conversations, intelligent feedback, and performance analytics.
+
+The platform combines:
+
+-  Real-time peer matchmaking
+-  WebRTC voice communication
+-  AI-powered speech analysis
+-  Progress tracking & analytics
+-  Gamification systems
+-  Safe moderated community
+
+Unlike traditional learning apps, NoJudgment focuses on **real conversations** instead of passive exercises.
 
 ---
 
-## 📄 Pages & Functionalities
+#  Core Features
 
-### **Public Pages**
+## Real-Time Speaking Practice
+- Connect with users based on skill level
+- Live peer-to-peer voice conversations
+- Topic-based matchmaking
 
-**`/` - Landing Page**
-- Hero section with value proposition, feature showcase, CTAs
-- Animated UI with Framer Motion, responsive gradients
+## AI Speech Analysis
+- Fluency scoring
+- Clarity analysis
+- Filler word detection
+- English usage percentage
+- Personalized AI feedback
 
-### **Protected Pages** (Authenticated Users Only)
+## Analytics Dashboard
+- Session performance tracking
+- Daily progress heatmaps
+- Weak area identification
+- Session history & trends
 
-| Page | Core Functionality |
-|------|-------------------|
-| **`/dashboard`** | Performance metrics, 30-day trend graphs, recent sessions, weak areas, points/streak display |
-| **`/dashboard/aicoach`** | Chat interface with AI coach, 20-message history context, real-time Groq responses |
-| **`/dashboard/matchmaking`** | Queue: select level + topic; Socket.io `join_queue` event; waiting status |
-| **`/room/[roomId]`** | Live WebRTC audio: mute/unmute, duration timer, live English score (%), transcription capture |
-| **`/post-call`** | Session metrics (fluency 0-10, clarity 0-10, filler words, English %), AI feedback, points awarded |
-| **`/dashboard/leaderboard`** | Top 50 by points, current user rank, streak counter, total sessions per user |
-| **`/dashboard/practice`** | Session history with filters, metrics summary, session replays |
-| **`/dashboard/reports`** | Moderation view: submitted reports, reporter/reported info, ban status |
-| **`/dashboard/settings`** | Profile management, notification preferences, privacy, account deletion |
+## Gamification
+- Points & streak system
+- Global leaderboard
+- Achievement badges
+- Session rewards
 
----
-
-## 🛠 Tech Stack & Usage
-
-### **Frontend Stack**
-
-| Tech | Version | How It's Used |
-|------|---------|--------------|
-| **Next.js** | 16.2.4 | App Router, API routes, SSR/SSG optimization, built-in image optimization |
-| **React** | 19.2.4 | Component-based UI, hooks (useState, useEffect, useRef), client/server components |
-| **TypeScript** | 5.x | Type-safe components, API routes, prevents runtime errors |
-| **Tailwind CSS** | 4.x | Responsive utility classes, custom color variables, dark mode |
-| **Framer Motion** | 12.38.0 | Landing animations, stagger effects, smooth transitions |
-| **Lucide React** | 1.14.0 | Icon library (Mic, Globe, Shield, Star, etc.) |
-| **Socket.io Client** | 4.8.3 | Real-time events: `join_queue`, `matched`, WebRTC signaling |
+## Moderation & Safety
+- User reporting system
+- Automatic moderation actions
+- Safe and beginner-friendly environment
 
 ---
 
-### **Backend Stack**
+# 🖼 Screenshots
 
-| Tech | Version | How It's Used |
-|------|---------|--------------|
-| **Next.js API Routes** | 16.2.4 | 9 HTTP endpoints; serverless, auto-scaling on Vercel |
-| **NextAuth** | 4.24.14 | Google OAuth 2.0; JWT in HTTP-only cookies; Prisma adapter |
-| **Prisma ORM** | 5.22.0 | Type-safe queries, auto-generated client, relationships, ACID transactions |
-| **Socket.io Server** | 4.8.3 | Separate Node.js (port 3001); matchmaking queue, WebRTC signaling |
-| **Groq SDK** | 1.1.2 | AI inference for `/api/analyze` (speech) and `/api/coach` (conversation) |
-| **Llama 3.1 8B** | Instant | LLM: analyzes transcript (fluency/clarity/filler), generates coaching responses |
+## Landing Page
+![Landing](./public/screenshots/landing.png)
+
+## Matchmaking Dashboard
+![Dashboard](./public/screenshots/dashboard.png)
 
 ---
 
-### **Database Stack**
+# Why NoJudgment?
 
-| Component | Technology | Usage |
-|-----------|-----------|-------|
-| **Primary DB** | PostgreSQL 14+ | Relational data: Users, Sessions, Analyses, Messages, Points, Reports |
-| **ORM** | Prisma 5.22.0 | Schema-driven design, auto-migrations, relationship management, transactions |
-| **Models** | 8 Prisma models | User, MatchSession, SessionAnalysis, CoachMessage, PointTransaction, Report, Account, Session |
+Millions of people avoid practicing English because they fear embarrassment or judgment.
 
-**Key Operations**:
-- Point updates with atomic transactions (race condition prevention)
-- Streak calculation on daily active check
-- Auto-ban when report count ≥ 3
-- Chat history query (last 20 messages for context)
+NoJudgment creates a safe environment where users can:
+- speak freely,
+- improve consistently,
+- and receive constructive AI guidance.
 
----
+The goal is simple:
 
-### **Real-Time Communication Stack**
-
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Peer Audio** | WebRTC (Browser native) | P2P audio streaming; echo cancellation, noise suppression |
-| **Signaling** | Socket.io | Matchmaking queue, WebRTC SDP offer/answer, ICE relay |
-| **NAT Traversal** | STUN/TURN | Google STUN (stun.l.google.com:19302); Metered OpenRelay TURN |
-
-**WebRTC Flow**:
-1. User joins queue → `join_queue` emitted
-2. Backend matches → `matched` event
-3. Both users join WebRTC room
-4. Caller creates offer, sends via Socket.io
-5. Callee receives offer, creates answer
-6. ICE candidates exchanged asynchronously
-7. Direct P2P audio connection established
+> Help people gain confidence through real conversation.
 
 ---
 
-## 📡 API Endpoints Overview
+# Tech Stack
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/analyze` | POST | Groq AI analyzes transcript; returns fluency, clarity, filler words, English score |
-| `/api/coach` | GET/POST | Get chat history or send message to AI coach |
-| `/api/match` | POST | Create/join matchmaking session with level + topic |
-| `/api/points` | GET/POST | Get points & history or award/deduct with transaction |
-| `/api/leaderboard` | GET | Top 50 users by points + current user rank |
-| `/api/report` | GET/POST | Submit report or retrieve all reports (admin) |
-| `/api/dashboard` | GET | Complete user data: stats, sessions, graphs |
-| `/api/heatmap` | GET | 30-day performance heatmap |
-| `/api/auth/[...nextauth]` | GET/POST | Google OAuth authentication |
+## Frontend
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Framer Motion
 
----
+## Backend
+- Next.js API Routes
+- Socket.io
+- Prisma ORM
+- NextAuth
 
-## 🎮 Gamification System
+## Database
+- PostgreSQL
 
-**Points**: +10 session, +5 good rating, -10 early exit, -15 non-English (>50%)
-
-**Streak Logic**: Consecutive days increment, gap resets to 1
-
-**Badges**: 3-day 🥉, 7-day 🥈, 30-day 🥇, 100-day 🏆
-
-**Leaderboard**: Ranked by cumulative points (top 50), updated per transaction
+## AI & Realtime
+- Groq SDK
+- Llama 3.1
+- WebRTC
+- Socket.io Signaling
 
 ---
 
-## 🚀 Quick Start
+# System Architecture
 
-### **Prerequisites**
-Node.js 18+, PostgreSQL 14+, npm/yarn
+```text
+User
+  ↓
+Next.js Frontend
+  ↓
+Socket.io Matchmaking
+  ↓
+WebRTC Peer Connection
+  ↓
+AI Analysis Engine
+  ↓
+PostgreSQL Database
+````
 
-### **Installation**
+---
+
+# Major Modules
+
+| Module         | Description                  |
+| -------------- | ---------------------------- |
+| Authentication | Google OAuth login system    |
+| Matchmaking    | Real-time peer matching      |
+| Voice Rooms    | WebRTC audio communication   |
+| AI Coach       | Conversational AI assistance |
+| Analytics      | User performance tracking    |
+| Leaderboard    | Gamification & rankings      |
+| Moderation     | Reports & safety management  |
+
+---
+
+# 🛠 Installation
+
+## Clone Repository
+
 ```bash
 git clone https://github.com/yourusername/nojudgment.git
 cd nojudgment
-npm install
-setup .env file
-npm run socket        # Terminal 2: :3001
-# Open http://localhost:3000
 ```
 
-### **Scripts**
+## Install Dependencies
+
 ```bash
-npm run dev                  # Next.js dev server
-npm run socket              # Socket.io server
-npm run build               # Production build
-npm start                   # Production server
-npx prisma studio          # Database UI
-npx prisma migrate dev      # Create migration
+npm install
+```
+
+## Setup Environment Variables
+
+Create a `.env` file:
+
+```env
+DATABASE_URL=
+NEXTAUTH_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GROQ_API_KEY=
+```
+
+## Run Database Migration
+
+```bash
+npx prisma migrate dev
+```
+
+## Start Development Server
+
+```bash
+npm run dev
+```
+
+## Start Socket Server
+
+```bash
+npm run socket
+```
+
+Open:
+
+```text
+http://localhost:3000
 ```
 
 ---
 
-## 🔐 Security & Performance
+# 📂 Project Structure
 
-✅ **Security**: NextAuth OAuth, HTTP-only JWT, Prisma parameterized queries, role-based access, rate limiting  
-✅ **Performance**: Serverless auto-scaling, WebRTC P2P, connection pooling, ACID transactions  
-✅ **Reliability**: Session persistence, graceful error handling, automatic rollbacks
-
----
-
-## 📊 Database Schema
-
-```prisma
-User { id, email, name, image, points, streak, isBanned, createdAt }
-MatchSession { id, user1Id, user2Id, status, level, topic }
-SessionAnalysis { id, userId, fluency, clarity, fillerWords, englishScore, feedback, durationSecs }
-CoachMessage { id, userId, role, content, createdAt }
-PointTransaction { id, userId, amount, reason, createdAt }
-Report { id, reporterId, reportedId, reason, auto-ban at 3+ }
+```bash
+app/
+components/
+lib/
+prisma/
+public/
+server.js
 ```
 
 ---
 
-<div align="center">
+# Security & Performance
 
-**Made with ❤️ to help people speak English with confidence by Arpita, Sahil and Swoasti**
+* Secure Google OAuth authentication
+* HTTP-only JWT sessions
+* Prisma parameterized queries
+* WebRTC peer-to-peer communication
+* Optimized serverless APIs
+* Real-time Socket.io architecture
 
-</div>
+---
+
+# 🌐 Deployment
+
+| Service          | Usage                 |
+| ---------------- | --------------------- |
+| Vercel           | Frontend Hosting      |
+| PostgreSQL       | Database              |
+| Railway / Render | Socket Server Hosting |
+
+---
+
+# Roadmap
+
+* Video calling support
+* Mobile application
+* AI pronunciation correction
+* Group conversation rooms
+* Voice emotion analysis
+* AI interview practice mode
+
+---
+
+# Demo
+
+```text
+Live Demo: https://no-judgement.vercel.app/
+```
+
+---
+
+# Future Vision
+
+NoJudgment aims to become a globally accessible communication platform where language learners can practice naturally, confidently, and without fear.
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+<p align="center">
+  Made with ❤️ to help people speak English with confidence by Arpita, Sahil and Swoasti
+</p>
+```
