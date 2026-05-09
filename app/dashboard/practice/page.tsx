@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import {
   Briefcase,
   Coffee,
@@ -8,7 +7,20 @@ import {
   ArrowRight,
   Clock,
   Star,
+  Lock,
 } from "lucide-react";
+
+import {
+  AnimatePresence,
+  motion,
+} from "framer-motion";
+
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 
 const modes = [
   {
@@ -65,8 +77,34 @@ const colorMap = {
 };
 
 export default function PracticeMode() {
+  const [active, setActive] = useState<any>(null);
+
+  const id = useId();
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setActive(null);
+      }
+    }
+
+    if (active) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [active]);
+
   return (
-    <div className="space-y-8 p-6 md:p-10">
+    <div className="space-y-8 p-6 md:p-10 relative">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -74,6 +112,7 @@ export default function PracticeMode() {
           <h2 className="text-3xl font-bold text-gray-900">
             Choose Practice Mode
           </h2>
+
           <p className="text-gray-400 mt-1">
             Select a scenario to start your focused speaking session.
           </p>
@@ -83,94 +122,356 @@ export default function PracticeMode() {
           <button className="px-4 py-2 bg-white border rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50">
             By Topic
           </button>
+
           <button className="px-4 py-2 bg-white border rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50">
             By Level
           </button>
         </div>
       </div>
 
+      {/* EXPANDED MODAL */}
+      <AnimatePresence>
+        {active && (
+          <>
+            {/* OVERLAY */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            />
+
+            {/* MODAL */}
+            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+
+              <motion.div
+                layoutId={`card-${active.id}-${id}`}
+                ref={ref}
+                className="
+                  w-full
+                  max-w-2xl
+                  bg-white
+                  rounded-[2rem]
+                  shadow-2xl
+                  overflow-hidden
+                  border
+                "
+              >
+
+                <div className="p-8">
+
+                  {/* TOP */}
+                  <div className="flex items-start justify-between">
+
+                    <div>
+
+                      {/* ICON */}
+                      <div
+                      className={`
+                        w-16
+                        h-16
+                        rounded-2xl
+                        flex
+                        items-center
+                        justify-center
+                        mb-6
+                        ${
+                          colorMap[
+                            active.color as keyof typeof colorMap
+                          ].bg
+                        }
+                        ${
+                          colorMap[
+                            active.color as keyof typeof colorMap
+                          ].text
+                        }
+                      `}
+                    >
+                      <Lock size={30} strokeWidth={2.5} />
+                    </div>
+
+                      {/* TITLE */}
+                      <motion.h2
+                        layoutId={`title-${active.id}-${id}`}
+                        className="text-4xl font-bold text-gray-900"
+                      >
+                        {active.title}
+                      </motion.h2>
+
+                      {/* DESC */}
+                      <motion.p
+                        layoutId={`desc-${active.id}-${id}`}
+                        className="text-gray-500 mt-3 max-w-lg"
+                      >
+                        {active.desc}
+                      </motion.p>
+
+                    </div>
+
+                    {/* CLOSE */}
+                    <button
+                      onClick={() => setActive(null)}
+                      className="
+                        w-10
+                        h-10
+                        rounded-full
+                        bg-gray-100
+                        hover:bg-gray-200
+                        transition
+                        flex
+                        items-center
+                        justify-center
+                        font-bold
+                      "
+                    >
+                      ✕
+                    </button>
+
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="mt-10 space-y-6">
+
+                    {/* STATS */}
+                    <div className="grid grid-cols-2 gap-4">
+
+                      <div className="bg-gray-50 rounded-2xl p-5">
+                        <p className="text-sm text-gray-400 mb-1">
+                          Difficulty
+                        </p>
+
+                        <p className="font-bold text-lg">
+                          {active.difficulty}
+                        </p>
+                      </div>
+
+                      <div className="bg-gray-50 rounded-2xl p-5">
+                        <p className="text-sm text-gray-400 mb-1">
+                          Question Bank
+                        </p>
+
+                        <p className="font-bold text-lg">
+                          {active.stats}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    {/* FEATURES */}
+                    <div className="bg-gray-50 rounded-2xl p-6">
+
+                      <h4 className="font-bold text-lg mb-4">
+                        What you'll practice
+                      </h4>
+
+                      <ul className="space-y-3 text-gray-600">
+
+                        <li className="flex items-center gap-2">
+                          ✨ Real-time speaking analysis
+                        </li>
+
+                        <li className="flex items-center gap-2">
+                          🎤 Pronunciation improvement
+                        </li>
+
+                        <li className="flex items-center gap-2">
+                          📈 Fluency scoring
+                        </li>
+
+                        <li className="flex items-center gap-2">
+                          🧠 AI-generated responses
+                        </li>
+
+                      </ul>
+
+                    </div>
+
+                    {/* CTA */}
+                    <button
+                      className="
+                        w-full
+                        py-4
+                        rounded-2xl
+                        bg-black
+                        text-white
+                        font-bold
+                        text-lg
+                        hover:scale-[1.01]
+                        transition
+                      "
+                    >
+                      Start Session
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </motion.div>
+
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
         {modes.map((mode, i) => {
-          const color = colorMap[mode.color as keyof typeof colorMap];
+          const color =
+            colorMap[mode.color as keyof typeof colorMap];
 
           return (
+
             <motion.div
               key={mode.id}
+              layoutId={`card-${mode.id}-${id}`}
+              onClick={() => setActive(mode)}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               whileHover={{ y: -5 }}
-              className="group"
+              className="group cursor-pointer"
             >
+
               <div className="bg-white p-8 rounded-[2rem] border shadow-sm flex flex-col h-full relative overflow-hidden transition-all group-hover:shadow-xl">
 
-                {/* Accent */}
+                {/* ACCENT */}
                 <div
-                  className={`absolute top-0 right-0 w-24 h-24 ${color.accent} ${color.hover} rounded-bl-[4rem]`}
+                  className={`
+                    absolute
+                    top-0
+                    right-0
+                    w-24
+                    h-24
+                    ${color.accent}
+                    ${color.hover}
+                    rounded-bl-[4rem]
+                  `}
                 />
 
-                {/* Icon */}
+                {/* ICON */}
                 <div
-                  className={`w-14 h-14 ${color.bg} ${color.text} rounded-2xl flex items-center justify-center mb-8`}
+                  className={`
+                    w-14
+                    h-14
+                    ${color.bg}
+                    ${color.text}
+                    rounded-2xl
+                    flex
+                    items-center
+                    justify-center
+                    mb-8
+                  `}
                 >
                   <mode.icon size={28} />
                 </div>
 
                 <div className="flex-1">
+
                   {/* BADGES */}
                   <div className="flex gap-2 mb-2">
+
                     <span
-                      className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                        mode.difficulty === "Easy"
-                          ? "bg-green-50 text-green-600"
-                          : mode.difficulty === "Hard"
-                          ? "bg-orange-50 text-orange-600"
-                          : "bg-red-50 text-red-600"
-                      }`}
+                      className={`
+                        px-2
+                        py-0.5
+                        text-[10px]
+                        font-bold
+                        rounded
+                        ${
+                          mode.difficulty === "Easy"
+                            ? "bg-green-50 text-green-600"
+                            : mode.difficulty === "Hard"
+                            ? "bg-orange-50 text-orange-600"
+                            : "bg-red-50 text-red-600"
+                        }
+                      `}
                     >
                       {mode.difficulty}
                     </span>
 
                     <span className="text-[10px] font-bold text-gray-400 flex items-center">
-                      <Clock size={10} className="mr-1" /> 15 MIN
+                      <Clock size={10} className="mr-1" />
+                      15 MIN
                     </span>
+
                   </div>
 
-                  <h3 className="text-2xl font-bold mb-3">{mode.title}</h3>
-                  <p className="text-gray-500 text-sm mb-6">{mode.desc}</p>
+                  {/* TITLE */}
+                  <motion.h3
+                    layoutId={`title-${mode.id}-${id}`}
+                    className="text-2xl font-bold mb-3"
+                  >
+                    {mode.title}
+                  </motion.h3>
+
+                  {/* DESC */}
+                  <motion.p
+                    layoutId={`desc-${mode.id}-${id}`}
+                    className="text-gray-500 text-sm mb-6"
+                  >
+                    {mode.desc}
+                  </motion.p>
+
                 </div>
 
                 {/* FOOTER */}
                 <div className="flex justify-between items-center pt-6 border-t">
+
                   <div>
-                    <p className="text-xs text-gray-400 uppercase">Library</p>
-                    <p className="text-sm font-bold">{mode.stats}</p>
+                    <p className="text-xs text-gray-400 uppercase">
+                      Library
+                    </p>
+
+                    <p className="text-sm font-bold">
+                      {mode.stats}
+                    </p>
                   </div>
 
                   <button
-                    className={`w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center ${color.btn} group-hover:text-white transition`}
+                    className={`
+                      w-10
+                      h-10
+                      bg-gray-50
+                      rounded-xl
+                      flex
+                      items-center
+                      justify-center
+                      ${color.btn}
+                      group-hover:text-white
+                      transition
+                    `}
                   >
                     <ArrowRight size={20} />
                   </button>
+
                 </div>
+
               </div>
+
             </motion.div>
+
           );
         })}
+
       </div>
 
       {/* EXTRA SECTION */}
       <section className="bg-white p-8 rounded-[2rem] border shadow-sm">
+
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
 
           <div className="space-y-4">
+
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-bold">
               <Star size={16} fill="currentColor" />
               NEW MODE
             </div>
 
-            <h3 className="text-3xl font-bold">Presentation Practice</h3>
+            <h3 className="text-3xl font-bold">
+              Presentation Practice
+            </h3>
 
             <p className="text-gray-500">
               Upload your slides and practice your pitch with AI feedback.
@@ -179,26 +480,40 @@ export default function PracticeMode() {
             <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-blue-500 text-white font-semibold">
               Join Waitlist
             </button>
+
           </div>
 
           {/* GRAPH */}
           <div className="w-full md:w-1/3 aspect-square bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl flex items-center justify-center p-12">
+
             <div className="grid grid-cols-2 gap-4 w-full">
+
               {[40, 70, 90, 50].map((h, i) => (
-                <div key={i} className="bg-orange-200 rounded-xl min-h-24 relative overflow-hidden">
+
+                <div
+                  key={i}
+                  className="bg-orange-200 rounded-xl min-h-24 relative overflow-hidden"
+                >
+
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${h}%` }}
                     transition={{ delay: i * 0.2 + 0.5 }}
                     className="absolute bottom-0 w-full bg-orange-400"
                   />
+
                 </div>
+
               ))}
+
             </div>
+
           </div>
 
         </div>
+
       </section>
+
     </div>
   );
 }
