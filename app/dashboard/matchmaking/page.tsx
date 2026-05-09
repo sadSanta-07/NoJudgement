@@ -118,6 +118,7 @@ const userId = (session?.user as any)?.id || session?.user?.email;
             topic={topic.toLowerCase()}  
             userId={userId}
             label="Search for partner"
+            buttonClassName= "bg-gradient-to-r from-[#FF8A3D] via-[#B39BC8] to-[#3B6CFF]"
           />
         </div>
 
