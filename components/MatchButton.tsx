@@ -12,6 +12,7 @@ interface Props {
   topic: string;
   userId: string;
   label?: string;
+  buttonClassName?: string;
 }
 
 export default function MatchButton({
@@ -19,16 +20,22 @@ export default function MatchButton({
   topic,
   userId,
   label = "Start a Session",
+  buttonClassName = "",
 }: Props) {
-  const [status, setStatus] = useState<"idle" | "searching" | "matched">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "searching" | "matched"
+  >("idle");
+
   const socketRef = useRef<Socket | null>(null);
+
   const router = useRouter();
+
   const { data: session } = useSession();
 
-  // ✅ CLEANUP ON UNMOUNT
   useEffect(() => {
     return () => {
       const socket = socketRef.current;
+
       if (socket) {
         socket.off("matched");
         socket.off("connect_error");
@@ -38,6 +45,7 @@ export default function MatchButton({
 
   const startSearch = async () => {
     if (status === "searching") return;
+
     if (!userId) {
       console.error("User not authenticated");
       return;
@@ -46,6 +54,7 @@ export default function MatchButton({
     setStatus("searching");
 
     const socket = getSocket();
+
     socketRef.current = socket;
 
     const roomId = crypto.randomUUID();
@@ -62,42 +71,62 @@ export default function MatchButton({
     if (socket.connected) emitJoin();
     else socket.once("connect", emitJoin);
 
-    // ✅ SAFE: remove previous listeners before adding
     socket.off("matched");
     socket.off("connect_error");
 
-    socket.once("matched", async ({ roomId: serverRoomId }) => {
-      const finalRoomId = serverRoomId || roomId;
+    socket.once(
+      "matched",
+      async ({ roomId: serverRoomId }) => {
+        const finalRoomId =
+          serverRoomId || roomId;
 
-      try {
-        const res = await fetch("/api/match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            level,
-            topic,
-            roomId: finalRoomId,
-          }),
-        });
+        try {
+          const res = await fetch(
+            "/api/match",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+              body: JSON.stringify({
+                level,
+                topic,
+                roomId: finalRoomId,
+              }),
+            }
+          );
 
-        if (!res.ok) throw new Error("Match API failed");
+          if (!res.ok)
+            throw new Error(
+              "Match API failed"
+            );
 
-        setStatus("matched");
+          setStatus("matched");
 
-        setTimeout(() => {
-          router.push(`/room/${finalRoomId}`);
-        }, 600);
+          setTimeout(() => {
+            router.push(
+              `/room/${finalRoomId}`
+            );
+          }, 600);
 
-      } catch (err) {
-        console.error(err);
+        } catch (err) {
+          console.error(err);
+          setStatus("idle");
+        }
+      }
+    );
+
+    socket.once(
+      "connect_error",
+      () => {
+        console.error(
+          "Socket connection failed"
+        );
+
         setStatus("idle");
       }
-    });
-
-    socket.once("connect_error", () => {
-      console.error("Socket connection failed");
-      setStatus("idle");
-    });
+    );
   };
 
   const cancelSearch = () => {
@@ -105,6 +134,7 @@ export default function MatchButton({
 
     if (socket) {
       socket.emit("leave_queue");
+
       socket.off("matched");
       socket.off("connect_error");
     }
@@ -119,14 +149,24 @@ export default function MatchButton({
       {status === "idle" && (
         <button
           onClick={startSearch}
-          className="flex items-center gap-3 px-8 py-4 rounded-full 
-                     bg-white text-gray-900 font-semibold text-lg
-                     shadow-md hover:shadow-lg 
-                     transition-all duration-200
-                     active:scale-[0.97]"
+          className={`
+            flex items-center gap-3 px-8 py-4 rounded-full
+            font-semibold text-lg
+            shadow-md hover:shadow-lg
+            transition-all duration-200
+            active:scale-[0.97]
+
+            ${
+              buttonClassName ||
+              "bg-white text-gray-900"
+            }
+          `}
         >
           {label}
-          <span className="text-xl font-bold">+</span>
+
+          <span className="text-xl font-bold">
+            +
+          </span>
         </button>
       )}
 
@@ -140,8 +180,14 @@ export default function MatchButton({
               <motion.div
                 key={i}
                 className="absolute w-48 h-48 rounded-full border border-blue-300"
-                initial={{ scale: 0.8, opacity: 0.5 }}
-                animate={{ scale: 2.5, opacity: 0 }}
+                initial={{
+                  scale: 0.8,
+                  opacity: 0.5,
+                }}
+                animate={{
+                  scale: 2.5,
+                  opacity: 0,
+                }}
                 transition={{
                   duration: 2,
                   repeat: Infinity,
@@ -160,7 +206,9 @@ export default function MatchButton({
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-[#FF6A00] to-[#3B5BFF] flex items-center justify-center text-white font-bold text-xl">
-                  {session?.user?.name?.charAt(0) || "U"}
+                  {session?.user?.name?.charAt(
+                    0
+                  ) || "U"}
                 </div>
               )}
             </div>
@@ -173,8 +221,14 @@ export default function MatchButton({
 
           <p className="text-gray-500 text-center max-w-md mb-6">
             Finding someone interested in{" "}
-            <span className="text-blue-600 font-semibold">{topic}</span> at{" "}
-            <span className="text-blue-600 font-semibold">{level}</span> level.
+            <span className="text-blue-600 font-semibold">
+              {topic}
+            </span>{" "}
+            at{" "}
+            <span className="text-blue-600 font-semibold">
+              {level}
+            </span>{" "}
+            level.
           </p>
 
           {/* DOT LOADER */}
@@ -183,7 +237,9 @@ export default function MatchButton({
               <motion.div
                 key={i}
                 className="w-2.5 h-2.5 bg-blue-400 rounded-full"
-                animate={{ y: [0, -6, 0] }}
+                animate={{
+                  y: [0, -6, 0],
+                }}
                 transition={{
                   duration: 0.6,
                   repeat: Infinity,

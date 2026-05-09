@@ -91,7 +91,7 @@ export default function Heatmap() {
       </div>
 
       {/* HEATMAP */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto flex justify-end">
         <div className="grid grid-rows-7 grid-flow-col gap-1 w-max">
           {heatmap.map((d, i) => {
             let color = "bg-gray-100";
