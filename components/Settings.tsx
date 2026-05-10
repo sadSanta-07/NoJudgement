@@ -1,9 +1,9 @@
 "use client";
 
-import { User, Lock, Mic } from "lucide-react";
+import { User, Lock, Mic, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
 
 const sectionVariants = {
@@ -70,7 +70,7 @@ export default function Settings() {
               )}
             </div>
 
-            <div>
+            <div className="flex-1">
               <h2 className="text-lg font-semibold text-gray-900">
                 {session?.user?.name || "User"}
               </h2>
@@ -79,6 +79,15 @@ export default function Settings() {
                 {session?.user?.email}
               </p>
             </div>
+
+            {/* LOGOUT BUTTON */}
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-500 border border-red-200 rounded-xl hover:bg-red-50 transition-colors"
+            >
+              <LogOut size={15} />
+              Logout
+            </button>
           </div>
 
           <motion.div
