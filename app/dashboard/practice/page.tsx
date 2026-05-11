@@ -18,7 +18,6 @@ import {
 import {
   useEffect,
   useId,
-  useRef,
   useState,
 } from "react";
 
@@ -52,6 +51,16 @@ const modes = [
   },
 ];
 
+const presentationMode = {
+  id: "presentation",
+  title: "Presentation Practice",
+  desc: "Upload your slides and practice your pitch with AI feedback.",
+  icon: Star,
+  color: "orange",
+  stats: "AI Feedback",
+  difficulty: "Medium",
+};
+
 const colorMap = {
   blue: {
     bg: "bg-blue-50",
@@ -81,8 +90,6 @@ export default function PracticeMode() {
 
   const id = useId();
 
-  const ref = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -92,23 +99,30 @@ export default function PracticeMode() {
 
     if (active) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
     }
 
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
+      document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
+
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [active]);
 
   return (
-    <div className="space-y-8 p-6 md:p-10 relative">
+    <div className="space-y-8 p-6 md:p-10 relative overflow-x-hidden">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+
         <div>
+
           <h2 className="text-3xl font-bold text-gray-900">
             Choose Practice Mode
           </h2>
@@ -116,9 +130,11 @@ export default function PracticeMode() {
           <p className="text-gray-400 mt-1">
             Select a scenario to start your focused speaking session.
           </p>
+
         </div>
 
         <div className="flex space-x-2">
+
           <button className="px-4 py-2 bg-white border rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50">
             By Topic
           </button>
@@ -126,35 +142,69 @@ export default function PracticeMode() {
           <button className="px-4 py-2 bg-white border rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50">
             By Level
           </button>
+
         </div>
+
       </div>
 
-      {/* EXPANDED MODAL */}
+      {/* MODAL */}
       <AnimatePresence>
+
         {active && (
           <>
-            {/* OVERLAY */}
+
+            {/* FULLSCREEN OVERLAY */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+              transition={{ duration: 0.2 }}
+              onClick={() => setActive(null)}
+              className="
+                fixed
+                inset-0
+                z-[999]
+                w-screen
+                h-screen
+                bg-black/50
+                backdrop-blur-md
+              "
             />
 
-            {/* MODAL */}
-            <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            {/* MODAL WRAPPER */}
+            <div
+              className="
+                fixed
+                inset-0
+                z-[1000]
+                flex
+                items-center
+                justify-center
+                p-4
+                overflow-y-auto
+              "
+            >
 
+              {/* MODAL */}
               <motion.div
                 layoutId={`card-${active.id}-${id}`}
-                ref={ref}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 250,
+                  damping: 25,
+                }}
                 className="
+                  relative
                   w-full
                   max-w-2xl
                   bg-white
                   rounded-[2rem]
                   shadow-2xl
-                  overflow-hidden
                   border
+                  overflow-hidden
                 "
               >
 
@@ -167,28 +217,34 @@ export default function PracticeMode() {
 
                       {/* ICON */}
                       <div
-                      className={`
-                        w-16
-                        h-16
-                        rounded-2xl
-                        flex
-                        items-center
-                        justify-center
-                        mb-6
-                        ${
-                          colorMap[
-                            active.color as keyof typeof colorMap
-                          ].bg
-                        }
-                        ${
-                          colorMap[
-                            active.color as keyof typeof colorMap
-                          ].text
-                        }
-                      `}
-                    >
-                      <Lock size={30} strokeWidth={2.5} />
-                    </div>
+                        className={`
+                          w-16
+                          h-16
+                          rounded-2xl
+                          flex
+                          items-center
+                          justify-center
+                          mb-6
+                          ${
+                            colorMap[
+                              active.color as keyof typeof colorMap
+                            ].bg
+                          }
+                          ${
+                            colorMap[
+                              active.color as keyof typeof colorMap
+                            ].text
+                          }
+                        `}
+                      >
+
+                        {active.id === "presentation" ? (
+                          <Star size={30} strokeWidth={2.5} />
+                        ) : (
+                          <Lock size={30} strokeWidth={2.5} />
+                        )}
+
+                      </div>
 
                       {/* TITLE */}
                       <motion.h2
@@ -236,6 +292,7 @@ export default function PracticeMode() {
                     <div className="grid grid-cols-2 gap-4">
 
                       <div className="bg-gray-50 rounded-2xl p-5">
+
                         <p className="text-sm text-gray-400 mb-1">
                           Difficulty
                         </p>
@@ -243,9 +300,11 @@ export default function PracticeMode() {
                         <p className="font-bold text-lg">
                           {active.difficulty}
                         </p>
+
                       </div>
 
                       <div className="bg-gray-50 rounded-2xl p-5">
+
                         <p className="text-sm text-gray-400 mb-1">
                           Question Bank
                         </p>
@@ -253,6 +312,7 @@ export default function PracticeMode() {
                         <p className="font-bold text-lg">
                           {active.stats}
                         </p>
+
                       </div>
 
                     </div>
@@ -300,7 +360,7 @@ export default function PracticeMode() {
                         transition
                       "
                     >
-                      Start Session
+                      Coming Soon
                     </button>
 
                   </div>
@@ -310,8 +370,10 @@ export default function PracticeMode() {
               </motion.div>
 
             </div>
+
           </>
         )}
+
       </AnimatePresence>
 
       {/* CARDS */}
@@ -336,7 +398,6 @@ export default function PracticeMode() {
 
               <div className="bg-white p-8 rounded-[2rem] border shadow-sm flex flex-col h-full relative overflow-hidden transition-all group-hover:shadow-xl">
 
-                {/* ACCENT */}
                 <div
                   className={`
                     absolute
@@ -350,7 +411,6 @@ export default function PracticeMode() {
                   `}
                 />
 
-                {/* ICON */}
                 <div
                   className={`
                     w-14
@@ -369,7 +429,6 @@ export default function PracticeMode() {
 
                 <div className="flex-1">
 
-                  {/* BADGES */}
                   <div className="flex gap-2 mb-2">
 
                     <span
@@ -382,6 +441,8 @@ export default function PracticeMode() {
                         ${
                           mode.difficulty === "Easy"
                             ? "bg-green-50 text-green-600"
+                            : mode.difficulty === "Medium"
+                            ? "bg-blue-50 text-blue-600"
                             : mode.difficulty === "Hard"
                             ? "bg-orange-50 text-orange-600"
                             : "bg-red-50 text-red-600"
@@ -398,7 +459,6 @@ export default function PracticeMode() {
 
                   </div>
 
-                  {/* TITLE */}
                   <motion.h3
                     layoutId={`title-${mode.id}-${id}`}
                     className="text-2xl font-bold mb-3"
@@ -406,7 +466,6 @@ export default function PracticeMode() {
                     {mode.title}
                   </motion.h3>
 
-                  {/* DESC */}
                   <motion.p
                     layoutId={`desc-${mode.id}-${id}`}
                     className="text-gray-500 text-sm mb-6"
@@ -416,10 +475,10 @@ export default function PracticeMode() {
 
                 </div>
 
-                {/* FOOTER */}
                 <div className="flex justify-between items-center pt-6 border-t">
 
                   <div>
+
                     <p className="text-xs text-gray-400 uppercase">
                       Library
                     </p>
@@ -427,6 +486,7 @@ export default function PracticeMode() {
                     <p className="text-sm font-bold">
                       {mode.stats}
                     </p>
+
                   </div>
 
                   <button
@@ -457,33 +517,74 @@ export default function PracticeMode() {
 
       </div>
 
-      {/* EXTRA SECTION */}
-      <section className="bg-white p-8 rounded-[2rem] border shadow-sm">
+      {/* PRESENTATION SECTION */}
+      <motion.section
+        layoutId={`card-presentation-${id}`}
+        onClick={() => setActive(presentationMode)}
+        whileHover={{ y: -5 }}
+        className="
+          bg-white
+          p-8
+          rounded-[2rem]
+          border
+          shadow-sm
+          cursor-pointer
+          overflow-hidden
+          relative
+          group
+          transition-all
+          hover:shadow-xl
+        "
+      >
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
 
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1">
 
             <div className="inline-flex items-center gap-2 bg-orange-100 text-orange-600 px-3 py-1 rounded-lg text-sm font-bold">
+
               <Star size={16} fill="currentColor" />
               NEW MODE
+
             </div>
 
-            <h3 className="text-3xl font-bold">
+            <motion.h3
+              layoutId={`title-presentation-${id}`}
+              className="text-3xl font-bold"
+            >
               Presentation Practice
-            </h3>
+            </motion.h3>
 
-            <p className="text-gray-500">
+            <motion.p
+              layoutId={`desc-presentation-${id}`}
+              className="text-gray-500"
+            >
               Upload your slides and practice your pitch with AI feedback.
-            </p>
+            </motion.p>
 
-            <button className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-blue-500 text-white font-semibold">
-              Join Waitlist
+            <button
+              className="
+                px-6
+                py-3
+                rounded-xl
+                bg-gradient-to-r
+                from-orange-500
+                to-blue-500
+                text-white
+                font-semibold
+                flex
+                items-center
+                gap-2
+                group-hover:scale-105
+                transition
+              "
+            >
+              Add Wishlist
+              <ArrowRight size={18} />
             </button>
 
           </div>
 
-          {/* GRAPH */}
           <div className="w-full md:w-1/3 aspect-square bg-gradient-to-br from-orange-50 to-orange-100 rounded-3xl flex items-center justify-center p-12">
 
             <div className="grid grid-cols-2 gap-4 w-full">
@@ -512,7 +613,7 @@ export default function PracticeMode() {
 
         </div>
 
-      </section>
+      </motion.section>
 
     </div>
   );
