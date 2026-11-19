@@ -20,31 +20,33 @@
 
 ---
 
-#  Overview
+# Overview
 
 **NoJudgment** is an AI-powered English speaking practice platform designed for non-native speakers to improve communication confidence through real-time conversations, intelligent feedback, and performance analytics.
 
 The platform combines:
 
--  Real-time peer matchmaking
--  WebRTC voice communication
--  AI-powered speech analysis
--  Progress tracking & analytics
--  Gamification systems
--  Safe moderated community
+- Real-time peer matchmaking
+- WebRTC voice communication
+- AI-powered speech analysis
+- Progress tracking & analytics
+- Gamification systems
+- Safe moderated community
 
 Unlike traditional learning apps, NoJudgment focuses on **real conversations** instead of passive exercises.
 
 ---
 
-#  Core Features
+# Core Features
 
 ## Real-Time Speaking Practice
+
 - Connect with users based on skill level
 - Live peer-to-peer voice conversations
 - Topic-based matchmaking
 
 ## AI Speech Analysis
+
 - Fluency scoring
 - Clarity analysis
 - Filler word detection
@@ -52,18 +54,21 @@ Unlike traditional learning apps, NoJudgment focuses on **real conversations** i
 - Personalized AI feedback
 
 ## Analytics Dashboard
+
 - Session performance tracking
 - Daily progress heatmaps
 - Weak area identification
 - Session history & trends
 
 ## Gamification
+
 - Points & streak system
 - Global leaderboard
 - Achievement badges
 - Session rewards
 
 ## Moderation & Safety
+
 - User reporting system
 - Automatic moderation actions
 - Safe and beginner-friendly environment
@@ -73,9 +78,11 @@ Unlike traditional learning apps, NoJudgment focuses on **real conversations** i
 # 🖼 Screenshots
 
 ## Landing Page
+
 ![Landing](./public/screenshots/landing.png)
 
 ## Matchmaking Dashboard
+
 ![Dashboard](./public/screenshots/dashboard.png)
 
 ---
@@ -85,6 +92,7 @@ Unlike traditional learning apps, NoJudgment focuses on **real conversations** i
 Millions of people avoid practicing English because they fear embarrassment or judgment.
 
 NoJudgment creates a safe environment where users can:
+
 - speak freely,
 - improve consistently,
 - and receive constructive AI guidance.
@@ -98,6 +106,7 @@ The goal is simple:
 # Tech Stack
 
 ## Frontend
+
 - Next.js 16
 - React 19
 - TypeScript
@@ -105,15 +114,18 @@ The goal is simple:
 - Framer Motion
 
 ## Backend
+
 - Next.js API Routes
 - Socket.io
 - Prisma ORM
 - NextAuth
 
 ## Database
+
 - PostgreSQL
 
 ## AI & Realtime
+
 - Groq SDK
 - Llama 3.1
 - WebRTC
@@ -221,12 +233,12 @@ server.js
 
 # Security & Performance
 
-* Secure Google OAuth authentication
-* HTTP-only JWT sessions
-* Prisma parameterized queries
-* WebRTC peer-to-peer communication
-* Optimized serverless APIs
-* Real-time Socket.io architecture
+- Secure Google OAuth authentication
+- HTTP-only JWT sessions
+- Prisma parameterized queries
+- WebRTC peer-to-peer communication
+- Optimized serverless APIs
+- Real-time Socket.io architecture
 
 ---
 
@@ -242,12 +254,12 @@ server.js
 
 # Roadmap
 
-* Video calling support
-* Mobile application
-* AI pronunciation correction
-* Group conversation rooms
-* Voice emotion analysis
-* AI interview practice mode
+- Video calling support
+- Mobile application
+- AI pronunciation correction
+- Group conversation rooms
+- Voice emotion analysis
+- AI interview practice mode
 
 ---
 

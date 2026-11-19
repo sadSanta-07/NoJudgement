@@ -1,54 +1,61 @@
 "use client";
+
 import Image from "next/image";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Button from "./ui/Button";
 
 interface Props {
   label?: string;
-  variant?: "primary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
 }
 
-export default function LoginButton({ label = "Login", variant = "primary" }: Props) {
+export default function LoginButton({
+  label = "Log In",
+  variant = "primary",
+  size = "md",
+}: Props) {
   const { data: session } = useSession();
 
   if (session) {
     return (
-      <div className="flex items-center gap-3">
-        <Image
-          src={session.user?.image || ""}
-          alt="User profile"
-          width={34}
-          height={34}
-          className="rounded-full"
-        />
-
-        <p className="text-sm font-medium text-black/70 hidden sm:block">
-          {session.user?.name?.split(" ")[0]}
-        </p>
+      <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1]">
+          {session.user?.image ? (
+            <Image
+              src={session.user.image}
+              alt={session.user.name || "User avatar"}
+              width={26}
+              height={26}
+              className="rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-[26px] h-[26px] rounded-full bg-[#1d1c1a] text-[#fbfaf7] text-xs flex items-center justify-center font-bold">
+              {session.user?.name?.charAt(0) || "U"}
+            </div>
+          )}
+          <span className="text-sm font-medium text-[#1d1c1a] hidden sm:inline">
+            {session.user?.name?.split(" ")[0]}
+          </span>
+        </div>
 
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="px-3 py-1.5 rounded-full text-sm font-medium 
-          text-black/70 hover:text-black transition"
+          className="px-3 py-1.5 text-xs font-mono font-medium rounded-[5px] bg-[#f1efea] hover:bg-[#e8e6e1] text-[#6a625a] hover:text-[#1d1c1a] border border-[#e8e6e1] transition-all cursor-pointer active:translate-y-[1px]"
         >
-          Logout
+          Log Out
         </button>
       </div>
     );
   }
 
-  const base = "px-4 py-2 rounded-full text-sm font-medium transition";
-
-  const styles =
-    variant === "primary"
-      ? "bg-black text-white hover:bg-black/90 shadow-md"
-      : "text-black/70 hover:text-black";
-
   return (
-    <button
+    <Button
+      variant={variant}
+      size={size}
       onClick={() => signIn("google")}
-      className={`${base} ${styles}`}
     >
       {label}
-    </button>
+    </Button>
   );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Zap, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { Zap, AlertCircle, CheckCircle2, Clock, Sparkles, ArrowRight } from "lucide-react";
 
 interface Analysis {
   fluency: number;
@@ -27,7 +27,6 @@ export default function PostCallPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // ✅ PRIMARY: sessionStorage (instant + accurate)
         const stored = sessionStorage.getItem("callAnalysis");
         const dur = sessionStorage.getItem("callDuration");
 
@@ -38,7 +37,6 @@ export default function PostCallPage() {
           return;
         }
 
-        // ✅ FALLBACK: backend (refresh-safe)
         const res = await fetch("/api/dashboard");
         const data = await res.json();
 
@@ -59,7 +57,6 @@ export default function PostCallPage() {
 
           setDuration(latest.durationSecs || 0);
         }
-
       } catch (err) {
         console.error("Failed to load analysis:", err);
       } finally {
@@ -74,152 +71,136 @@ export default function PostCallPage() {
     `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const getSessionQuality = () => {
-    if (!analysis) return "Session";
+    if (!analysis) return "Productive";
     const avg =
       (analysis.fluency + analysis.clarity + analysis.helpfulness) / 3;
 
-    if (avg >= 8) return "Excellent";
+    if (avg >= 8) return "Exceptional";
     if (avg >= 6) return "Great";
-    return "Good";
+    return "Promising";
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FB]">
-        <p className="text-gray-500">Loading your session...</p>
+      <div className="min-h-screen bg-[#f6f5f1] flex items-center justify-center p-6">
+        <p className="font-mono text-sm text-[#6a625a]">
+          Synthesizing your conversation diagnostic...
+        </p>
       </div>
     );
   }
 
   if (!analysis) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#F5F7FB]">
-        <p className="text-gray-500">No session data found.</p>
+      <div className="min-h-screen bg-[#f6f5f1] flex flex-col items-center justify-center p-6 gap-4">
+        <p className="font-mono text-sm text-[#6a625a]">No session data found.</p>
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="px-5 py-2.5 rounded-[5px] bg-[#1d1c1a] text-[#fbfaf7] text-xs font-mono"
+        >
+          Return to Dashboard
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB] p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-
-        {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-gradient-to-r from-[#FFA133] to-[#6F8EF6] rounded-3xl p-6 flex items-center gap-4 text-white shadow-md"
-        >
-          <motion.div
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Zap size={36} />
-          </motion.div>
-
-          <div>
-            <h1 className="text-3xl font-bold">
-              {getSessionQuality()} Session!
+    <div className="min-h-screen bg-[#f6f5f1] text-[#1d1c1a] bg-tactile-dots py-12 px-6">
+      <div className="max-w-4xl mx-auto space-y-8">
+        
+        {/* ── HEADER BANNER ── */}
+        <div className="rounded-[22px] bg-[#fcfbf8] border border-[#e8e6e1] p-8 sm:p-10 shadow-[0_1px_2px_rgba(60,48,30,.07),0_4px_8px_rgba(60,48,30,.07)] flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1] font-mono text-xs text-[#1d1c1a]">
+              <Sparkles size={13} className="text-[#b4400f]" />
+              <span>Session Completed</span>
+            </div>
+            <h1 className="font-display text-3xl sm:text-4xl font-normal text-[#1d1c1a] tracking-tight">
+              {getSessionQuality()} Speaking Session!
             </h1>
-            <p className="text-white/80 text-sm">
-              You're improving steadily 🚀
-            </p>
-          </div>
-        </motion.div>
-
-        {/* MAIN GRID */}
-        <div className="grid grid-cols-6 gap-4">
-
-          {/* DURATION */}
-          <div className="col-span-3 bg-white rounded-2xl p-6 border">
-            <div className="flex items-center gap-2 text-gray-500 mb-3">
-              <Clock size={16} />
-              <p className="text-xs uppercase">Duration</p>
-            </div>
-            <p className="text-5xl font-bold text-[#131313]">
-              {formatTime(duration)}
+            <p className="text-sm text-[#5e5b55] leading-relaxed">
+              Every sentence spoken builds auditory muscle and linguistic confidence.
             </p>
           </div>
 
-          {/* FILLER WORDS */}
-          <div className="col-span-3 bg-white rounded-2xl p-6 border">
-            <p className="text-xs uppercase text-gray-500 mb-3">
-              Filler Words
-            </p>
-            <p className="text-5xl font-bold text-[#CC7A1F]">
-              {analysis.fillerWords}
-            </p>
-          </div>
-
-          {/* SCORES */}
-          {[
-            { label: "Fluency", value: analysis.fluency, color: "#CC7A1F" },
-            { label: "Clarity", value: analysis.clarity, color: "#6F8EF6" },
-            { label: "Engagement", value: analysis.helpfulness, color: "#2A2A2A" },
-          ].map((item) => (
-            <div key={item.label} className="col-span-2 bg-white rounded-2xl p-4 border">
-              <p className="text-xs text-gray-500 uppercase mb-2">
-                {item.label}
-              </p>
-
-              <p className="text-4xl font-bold text-[#131313]">
-                {item.value}
-              </p>
-
-              <div className="mt-3 h-2 bg-gray-100 rounded-full">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${item.value * 10}%` }}
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* FEEDBACK SECTION */}
-        <div className="grid grid-cols-3 gap-4">
-
-          <div className="bg-white p-4 rounded-xl border-l-4 border-[#CC7A1F] shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle size={16} className="text-[#CC7A1F]" />
-              <p className="text-xs font-bold uppercase">Strong Point</p>
-            </div>
-            <p className="text-sm text-gray-600">
-              {analysis.strongPoints}
-            </p>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border-l-4 border-[#FFA133] shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle size={16} className="text-[#FFA133]" />
-              <p className="text-xs font-bold uppercase">Improve</p>
-            </div>
-            <p className="text-sm text-gray-600">
-              {analysis.improvePoints}
-            </p>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border-l-4 border-[#6F8EF6] shadow-sm">
-            <p className="text-xs uppercase text-gray-500 mb-2">
-              Feedback
-            </p>
-            <p className="text-sm text-gray-600">
-              {analysis.feedback}
-            </p>
+          <div className="shrink-0">
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-[5px] bg-[#1d1c1a] text-[#fbfaf7] text-sm font-medium hover:bg-[#2c2a26] transition-all cursor-pointer shadow-sm active:translate-y-[1px]"
+            >
+              <span>Back to Dashboard</span>
+              <ArrowRight size={15} />
+            </button>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="flex justify-center pt-4">
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="px-14 py-3 rounded-full font-semibold text-lg text-white
-                       bg-gradient-to-r from-[#FFA133] to-[#6F8EF6]
-                       hover:scale-105 hover:shadow-lg transition-all"
-          >
-            Back to Dashboard
-          </button>
+        {/* ── METRIC TILES ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="p-5 rounded-[16px] bg-[#fcfbf8] border border-[#e8e6e1] shadow-sm">
+            <span className="font-mono text-xs uppercase text-[#6a625a] block mb-1">Duration</span>
+            <p className="font-display text-3xl font-normal text-[#1d1c1a]">{formatTime(duration)}</p>
+            <span className="font-mono text-[10px] text-[#a39a8e] mt-1 block">Live peer dialogue</span>
+          </div>
+
+          <div className="p-5 rounded-[16px] bg-[#fcfbf8] border border-[#e8e6e1] shadow-sm">
+            <span className="font-mono text-xs uppercase text-[#6a625a] block mb-1">Fluency</span>
+            <p className="font-display text-3xl font-normal text-[#1d1c1a]">{analysis.fluency} <span className="text-lg text-[#6a625a]">/ 10</span></p>
+            <span className="font-mono text-[10px] text-[#a39a8e] mt-1 block">Rhythm & continuity</span>
+          </div>
+
+          <div className="p-5 rounded-[16px] bg-[#fcfbf8] border border-[#e8e6e1] shadow-sm">
+            <span className="font-mono text-xs uppercase text-[#6a625a] block mb-1">Clarity</span>
+            <p className="font-display text-3xl font-normal text-[#1d1c1a]">{analysis.clarity} <span className="text-lg text-[#6a625a]">/ 10</span></p>
+            <span className="font-mono text-[10px] text-[#a39a8e] mt-1 block">Enunciation & cadence</span>
+          </div>
+
+          <div className="p-5 rounded-[16px] bg-[#fcfbf8] border border-[#e8e6e1] shadow-sm">
+            <span className="font-mono text-xs uppercase text-[#6a625a] block mb-1">Filler Words</span>
+            <p className="font-display text-3xl font-normal text-[#b4400f]">{analysis.fillerWords}</p>
+            <span className="font-mono text-[10px] text-[#a39a8e] mt-1 block">&ldquo;um&rdquo;, &ldquo;ah&rdquo;, &ldquo;like&rdquo;</span>
+          </div>
+        </div>
+
+        {/* ── DETAILED DIAGNOSTIC FEEDBACK ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Strong Point */}
+          <div className="p-6 rounded-[18px] bg-[#99c1bb]/20 border border-[#99c1bb]/50 space-y-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={18} className="text-[#1e5d36]" />
+              <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+                What Stood Out
+              </span>
+            </div>
+            <p className="text-sm text-[#1d1c1a] leading-relaxed">
+              {analysis.strongPoints || "Great pacing and active listening throughout the dialogue."}
+            </p>
+          </div>
+
+          {/* Area to Polish */}
+          <div className="p-6 rounded-[18px] bg-[#d9b3a9]/25 border border-[#d9b3a9]/60 space-y-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle size={18} className="text-[#b4400f]" />
+              <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+                Area to Polish
+              </span>
+            </div>
+            <p className="text-sm text-[#1d1c1a] leading-relaxed">
+              {analysis.improvePoints || "Practice phrasing thoughts before speaking to decrease pauses."}
+            </p>
+          </div>
+
+          {/* Holistic AI Feedback */}
+          <div className="p-6 rounded-[18px] bg-[#c9bcd6]/25 border border-[#c9bcd6]/60 space-y-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={18} className="text-[#1d1c1a]" />
+              <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+                Coach Synthesis
+              </span>
+            </div>
+            <p className="text-sm text-[#1d1c1a] leading-relaxed">
+              {analysis.feedback || "Consistent progress. Continue attending daily conversations."}
+            </p>
+          </div>
         </div>
 
       </div>

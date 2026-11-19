@@ -1,4 +1,4 @@
--- CreateTable
+c:\Users\iffco\OneDrive\Pictures\Screenshots\Screenshot 2026-11-14 215002.png-- CreateTable
 CREATE TABLE "SessionAnalysis" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,

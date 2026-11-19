@@ -4,21 +4,15 @@ import { ShieldCheck, AlertTriangle, FileText, X, ChevronDown, Loader2, CheckCir
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 
-const sectionVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-};
-
 const REASON_OPTIONS = [
   { value: "inappropriate_language", label: "Inappropriate Language" },
-  { value: "harassment", label: "Harassment" },
-  { value: "not_speaking_english", label: "Not Speaking English" },
-  { value: "spam", label: "Spam" },
-  { value: "other", label: "Other" },
+  { value: "harassment", label: "Harassment or Disrespect" },
+  { value: "not_speaking_english", label: "Refusal to Speak English" },
+  { value: "spam", label: "Spam or Commercial Solicitation" },
+  { value: "other", label: "Other Code of Conduct Violation" },
 ] as const;
 
 type Reason = typeof REASON_OPTIONS[number]["value"];
-
 type ReportStatus = "idle" | "loading" | "success" | "error";
 
 interface ReportState {
@@ -71,7 +65,6 @@ export default function Reports() {
         throw new Error(data.message || "Failed to submit report.");
       }
 
-      // Update local state to reflect submitted report
       const newLog: ReportLog = {
         id: crypto.randomUUID(),
         userId: reportState.reportedUserId,
@@ -86,248 +79,213 @@ export default function Reports() {
         setShowModal(false);
         setStatus("idle");
         setReportState({ reportedUserId: "", reason: "", sessionId: "" });
-      }, 1800);
+      }, 1600);
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : "Something went wrong.");
       setStatus("error");
     }
   };
 
-  const pendingLabel = pendingCount === 0 ? "No Pending Reports" : `${pendingCount} Pending`;
-  const issuesLabel = logs.length === 0 ? "None" : `${logs.length} Reported`;
-  const sessionsLabel = logs.length === 0 ? "All Clear" : "Under Review";
+  const pendingLabel = pendingCount === 0 ? "No Pending Reports" : `${pendingCount} Under Investigation`;
 
   return (
-    <>
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        className="w-full max-w-2xl mx-auto space-y-8 px-4 sm:px-6 lg:px-0"
-      >
-        <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-100 shadow-sm overflow-hidden text-sm uppercase font-bold text-gray-400">
-          <div className="p-5 sm:p-8 space-y-6 sm:space-y-8">
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* ── SAFETY CONTAINER ── */}
+      <div className="rounded-[22px] bg-[#fcfbf8] border border-[#e8e6e1] p-6 sm:p-10 shadow-[0_1px_2px_rgba(60,48,30,.07),0_4px_8px_rgba(60,48,30,.07)] space-y-8">
+        
+        {/* HEADER */}
+        <div className="border-b border-[#e8e6e1] pb-5">
+          <h1 className="font-display text-3xl font-normal text-[#1d1c1a] tracking-tight">
+            Safety & Community Moderation
+          </h1>
+          <p className="font-mono text-xs text-[#6a625a] mt-1">
+            Zero-intimidation policy for respectful, encouraging English conversations
+          </p>
+        </div>
 
-            {/* Safe Conversations Section */}
-            <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-              <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
-                <ShieldCheck size={18} className="mr-3 text-green-500 shrink-0" /> Safe Conversations
-              </label>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">AI Monitoring</span>
-                <span className="text-green-600">Active</span>
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">Environment</span>
-                <span className="text-gray-900 normal-case font-medium sm:font-bold sm:uppercase">
-                  Respectful &amp; Helpful
-                </span>
-              </div>
-            </motion.div>
+        {/* SECTION 1: SYSTEM HEALTH */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={18} className="text-[#1e5d36]" />
+            <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+              Live Monitoring System
+            </span>
+          </div>
 
-            {/* Report an Issue Section */}
-            <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-              <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
-                <AlertTriangle size={18} className="mr-3 text-orange-500 shrink-0" /> Report an Issue
-              </label>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">Status</span>
-                <span className={`normal-case font-medium sm:font-bold sm:uppercase ${pendingCount > 0 ? "text-orange-500" : "text-gray-900"}`}>
-                  {pendingLabel}
-                </span>
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">Last Reviewed</span>
-                <span className="text-gray-900">Today</span>
-              </div>
-              {/* Report Button */}
-              <div className="pt-1">
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all text-white normal-case font-semibold text-sm tracking-normal shadow-sm"
-                >
-                  + File a Report
-                </button>
-              </div>
-            </motion.div>
-
-            {/* Recent Safety Logs Section */}
-            <motion.div variants={sectionVariants} className="space-y-3 sm:space-y-4">
-              <label className="flex items-center text-gray-900 border-b border-gray-50 pb-3 sm:pb-4">
-                <FileText size={18} className="mr-3 text-blue-500 shrink-0" /> Recent Safety Logs
-              </label>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">Issues Detected</span>
-                <span className={logs.length > 0 ? "text-orange-500" : "text-green-600"}>{issuesLabel}</span>
-              </div>
-              <div className="flex items-center justify-between py-3">
-                <span className="text-gray-500">Sessions Reviewed</span>
-                <span className={`normal-case font-medium sm:font-bold sm:uppercase ${logs.length > 0 ? "text-orange-500" : "text-gray-900"}`}>
-                  {sessionsLabel}
-                </span>
-              </div>
-
-              {/* Log entries */}
-              <AnimatePresence>
-                {logs.map((log) => (
-                  <motion.div
-                    key={log.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center justify-between py-3 px-4 rounded-2xl bg-black/[0.02] border border-black/[0.04]"
-                  >
-                    <span className="text-gray-400 normal-case font-normal tracking-normal">
-                      User <span className="font-mono text-xs text-gray-600">{log.userId}</span> — {log.reason}
-                    </span>
-                    <span className="text-gray-400 normal-case font-normal text-xs">
-                      {log.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </motion.div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+            <div className="p-4 rounded-[8px] bg-[#f5f3ee] border border-[#e8e6e1] flex justify-between items-center">
+              <span className="text-[#6a625a]">AI Speech Filter</span>
+              <span className="px-2 py-0.5 rounded-[4px] bg-[#d8eedf] text-[#1e5d36] font-semibold border border-[#b7dfc3]">
+                ● Active
+              </span>
+            </div>
+            <div className="p-4 rounded-[8px] bg-[#f5f3ee] border border-[#e8e6e1] flex justify-between items-center">
+              <span className="text-[#6a625a]">Room Encryption</span>
+              <span className="text-[#1d1c1a] font-semibold">P2P WebRTC DTLS</span>
+            </div>
           </div>
         </div>
-      </motion.div>
 
-      {/* Report Modal */}
+        {/* SECTION 2: REPORT AN ISSUE */}
+        <div className="space-y-4 pt-4 border-t border-[#e8e6e1]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle size={18} className="text-[#b4400f]" />
+              <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+                Report a Concern
+              </span>
+            </div>
+            <span className="font-mono text-xs text-[#6a625a]">{pendingLabel}</span>
+          </div>
+
+          <p className="text-sm text-[#5e5b55] leading-relaxed">
+            If a peer was disrespectful, refused to speak English, or used offensive language, submit a report. Moderation reviews room logs within 24 hours.
+          </p>
+
+          <div>
+            <button
+              onClick={() => setShowModal(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[5px] bg-[#1d1c1a] text-[#fbfaf7] text-xs font-mono font-medium shadow-sm hover:bg-[#2c2a26] transition-all cursor-pointer active:translate-y-[1px]"
+            >
+              + File Incident Report
+            </button>
+          </div>
+        </div>
+
+        {/* SECTION 3: RECENT LOGS */}
+        <div className="space-y-4 pt-4 border-t border-[#e8e6e1]">
+          <div className="flex items-center gap-2">
+            <FileText size={18} className="text-[#1d1c1a]" />
+            <span className="font-mono text-xs uppercase tracking-wider text-[#1d1c1a] font-semibold">
+              Recent Activity & Reports
+            </span>
+          </div>
+
+          {logs.length === 0 ? (
+            <div className="p-4 rounded-[8px] bg-[#f5f3ee] border border-[#e8e6e1] text-center font-mono text-xs text-[#6a625a]">
+              No incident reports filed in this session. All clear!
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {logs.map((log) => (
+                <div
+                  key={log.id}
+                  className="p-3 rounded-[8px] bg-[#f5f3ee] border border-[#e8e6e1] flex items-center justify-between text-xs font-mono"
+                >
+                  <span className="text-[#1d1c1a]">
+                    Reported user <span className="font-bold">{log.userId}</span> · {log.reason}
+                  </span>
+                  <span className="text-[#a39a8e]">
+                    {log.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+      </div>
+
+      {/* ── REPORT MODAL ── */}
       <AnimatePresence>
         {showModal && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={(e) => { if (e.target === e.currentTarget && status !== "loading") setShowModal(false); }}
-          >
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1d1c1a]/40 backdrop-blur-sm">
             <motion.div
-              className="bg-white/90 backdrop-blur-2xl rounded-[2rem] border border-white/50 shadow-[0_10px_50px_rgba(0,0,0,0.12)] w-full max-w-md overflow-hidden"
-              initial={{ scale: 0.95, opacity: 0, y: 10 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-[#fcfbf8] rounded-[22px] border border-[#e8e6e1] shadow-2xl w-full max-w-md p-6 sm:p-8 space-y-5"
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-black/[0.04]">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle size={18} className="text-orange-500" />
-                  <h2 className="text-base font-semibold text-gray-900">File a Report</h2>
-                </div>
+              <div className="flex items-center justify-between border-b border-[#e8e6e1] pb-3">
+                <h3 className="font-display text-2xl font-normal text-[#1d1c1a]">
+                  File Incident Report
+                </h3>
                 <button
-                  onClick={() => { if (status !== "loading") { setShowModal(false); setStatus("idle"); setErrorMessage(""); } }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => setShowModal(false)}
+                  className="w-7 h-7 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1] text-[#1d1c1a] flex items-center justify-center"
                 >
-                  <X size={18} />
+                  <X size={15} />
                 </button>
               </div>
 
-              {/* Success state */}
-              <AnimatePresence mode="wait">
-                {status === "success" ? (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col items-center justify-center py-12 px-6 gap-3"
-                  >
-                    <CheckCircle2 size={40} className="text-green-500" />
-                    <p className="text-gray-700 font-medium text-sm">Report submitted successfully.</p>
-                  </motion.div>
-                ) : (
-                  <motion.div key="form" className="px-6 py-5 space-y-4">
+              {status === "success" ? (
+                <div className="py-8 text-center space-y-2 font-mono text-xs">
+                  <CheckCircle2 size={36} className="text-[#1e5d36] mx-auto" />
+                  <p className="text-sm font-semibold text-[#1d1c1a]">Report filed successfully.</p>
+                  <p className="text-[#6a625a]">Our moderation team has received the transcript.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase text-[#6a625a]">
+                      Reported User Name or ID *
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. David M. or user_123"
+                      value={reportState.reportedUserId}
+                      onChange={(e) => setReportState((s) => ({ ...s, reportedUserId: e.target.value }))}
+                      className="w-full px-3.5 py-2.5 rounded-[5px] bg-[#fcfbf8] border border-[#e8e6e1] text-sm text-[#1d1c1a] focus:outline-none focus:ring-2 focus:ring-[#1d1c1a]"
+                    />
+                  </div>
 
-                    {/* User ID */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Reported User ID <span className="text-orange-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. user_abc123"
-                        value={reportState.reportedUserId}
-                        onChange={(e) => setReportState((s) => ({ ...s, reportedUserId: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
-                        disabled={status === "loading"}
-                      />
-                    </div>
-
-                    {/* Reason */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Reason <span className="text-orange-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={reportState.reason}
-                          onChange={(e) => setReportState((s) => ({ ...s, reason: e.target.value as Reason }))}
-                          className="w-full appearance-none px-4 py-2.5 pr-10 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 bg-white transition-all font-normal normal-case tracking-normal"
-                          disabled={status === "loading"}
-                        >
-                          <option value="" disabled>Select a reason…</option>
-                          {REASON_OPTIONS.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </select>
-                        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                      </div>
-                    </div>
-
-                    {/* Session ID (optional) */}
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        Session ID <span className="text-gray-300 normal-case font-normal">(optional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. sess_xyz789"
-                        value={reportState.sessionId}
-                        onChange={(e) => setReportState((s) => ({ ...s, sessionId: e.target.value }))}
-                        className="w-full px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 outline-none text-sm text-gray-800 transition-all font-normal normal-case tracking-normal"
-                        disabled={status === "loading"}
-                      />
-                    </div>
-
-                    {/* Error */}
-                    <AnimatePresence>
-                      {status === "error" && errorMessage && (
-                        <motion.p
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="text-xs text-red-500 normal-case font-normal tracking-normal"
-                        >
-                          {errorMessage}
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-1">
-                      <button
-                        onClick={() => { if (status !== "loading") { setShowModal(false); setStatus("idle"); setErrorMessage(""); } }}
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-black/[0.06] bg-black/[0.03] text-sm text-gray-500 hover:bg-gray-50 transition-all font-semibold normal-case tracking-normal"
-                        disabled={status === "loading"}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase text-[#6a625a]">
+                      Reason *
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={reportState.reason}
+                        onChange={(e) => setReportState((s) => ({ ...s, reason: e.target.value as Reason }))}
+                        className="w-full appearance-none px-3.5 py-2.5 rounded-[5px] bg-[#fcfbf8] border border-[#e8e6e1] text-sm text-[#1d1c1a] focus:outline-none focus:ring-2 focus:ring-[#1d1c1a] cursor-pointer"
                       >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleSubmit}
-                        disabled={!reportState.reportedUserId || !reportState.reason || status === "loading"}
-                        className="flex-1 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold normal-case tracking-normal transition-all flex items-center justify-center gap-2"
-                      >
-                        {status === "loading" ? (
-                          <><Loader2 size={15} className="animate-spin" /> Submitting…</>
-                        ) : "Submit Report"}
-                      </button>
+                        <option value="" disabled>Select reason...</option>
+                        {REASON_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6a625a] pointer-events-none" />
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-mono uppercase text-[#6a625a]">
+                      Session ID (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. room_abc..."
+                      value={reportState.sessionId}
+                      onChange={(e) => setReportState((s) => ({ ...s, sessionId: e.target.value }))}
+                      className="w-full px-3.5 py-2.5 rounded-[5px] bg-[#fcfbf8] border border-[#e8e6e1] text-sm text-[#1d1c1a] focus:outline-none focus:ring-2 focus:ring-[#1d1c1a]"
+                    />
+                  </div>
+
+                  {errorMessage && (
+                    <p className="text-xs text-red-600 font-mono">{errorMessage}</p>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 py-2.5 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1] text-xs font-mono text-[#1d1c1a]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={!reportState.reportedUserId || !reportState.reason || status === "loading"}
+                      className="flex-1 py-2.5 rounded-[5px] bg-[#1d1c1a] text-[#fbfaf7] text-xs font-mono font-medium disabled:opacity-40"
+                    >
+                      {status === "loading" ? "Submitting..." : "Submit Report"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Mic } from "lucide-react";
+import { Mic, CheckCircle2, Sparkles, Volume2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 const sentence =
@@ -17,88 +17,94 @@ export default function AICard() {
       setText(sentence.slice(0, i));
       i++;
       if (i > sentence.length) clearInterval(interval);
-    }, 25);
+    }, 35);
 
     return () => clearInterval(interval);
   }, []);
-  const progress = text.length / sentence.length;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="w-full max-w-3xl relative"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+      className="w-full max-w-2xl mx-auto"
     >
-      <div
-        className="absolute inset-0 blur-3xl rounded-full transition-all duration-300"
-        style={{
-          background: `linear-gradient(to right, rgba(255,161,51,${0.2 + progress * 0.4}), rgba(165,187,252,${0.2 + progress * 0.4}))`,
-        }}
-      />
-
-      {/* Card */}
-      <div className="relative backdrop-blur-2xl bg-white/70 border border-white/40 rounded-3xl shadow-2xl p-6">
-
-        {/* TOP */}
-        <div className="flex items-center justify-between mb-5">
+      <div className="relative rounded-[22px] bg-[#fcfbf8] border border-[#e8e6e1] shadow-[0_1px_2px_rgba(60,48,30,.07),0_4px_8px_rgba(60,48,30,.07),0_12px_24px_rgba(60,48,30,.07)] p-6 sm:p-8 overflow-hidden text-left">
+        
+        {/* TOP STATUS BAR */}
+        <div className="flex items-center justify-between border-b border-[#e8e6e1] pb-4 mb-6">
           <div className="flex items-center gap-3">
-
-            {/* Mic with pulse */}
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-orange-400/30 animate-ping" />
-              <div className="w-10 h-10 rounded-full bg-[#FFA133]/20 flex items-center justify-center relative">
-                <Mic size={18} className="text-[#FFA133]" />
-              </div>
+            {/* Tactile mic pill */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#b4400f] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#b4400f]" />
+              </span>
+              <Mic size={14} className="text-[#1d1c1a]" />
+              <span className="font-mono text-xs font-medium text-[#1d1c1a]">Live Audio Stream</span>
             </div>
-
-            <div>
-              <p className="font-semibold text-gray-800">
-                NoJudgment.AI
-              </p>
-              <p className="text-sm text-gray-500">
-                Listening...
-              </p>
-            </div>
+            <span className="font-mono text-xs text-[#6a625a] hidden sm:inline">48kHz WebRTC</span>
           </div>
 
-          {/* Waveform */}
-          <div className="flex gap-1 items-end h-6">
-            {[10, 16, 12, 20, 14].map((h, i) => (
+          {/* Tactile Waveform Bars */}
+          <div className="flex items-end gap-1 h-5 px-2 py-1 rounded-[5px] bg-[#f1efea] border border-[#e8e6e1]">
+            {[10, 16, 12, 20, 14, 18, 9].map((h, i) => (
               <motion.div
                 key={i}
-                animate={{ height: [h, h + 8, h] }}
+                animate={{ height: [h, Math.max(6, (h * 1.4) % 20), h] }}
                 transition={{
                   repeat: Infinity,
-                  duration: 1.2,
-                  delay: i * 0.15,
+                  duration: 1.1,
+                  delay: i * 0.12,
                 }}
-                className="w-1.5 bg-orange-400 rounded-full"
+                className="w-1 bg-[#1d1c1a] rounded-full"
                 style={{ height: h }}
               />
             ))}
           </div>
         </div>
 
-        {/* SPEECH */}
-        <div className="bg-white rounded-xl px-5 py-4 text-gray-700 shadow-sm border border-gray-100 min-h-[60px]">
-          {text}
-          <span className="animate-pulse">|</span>
-        </div>
-
-        {/* FEEDBACK */}
-        <div className="mt-4 flex items-center justify-between">
-
-          {/* Suggestion */}
-          <div className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm">
-            ✔ Try saying "overall, the presentation... "
+        {/* SPEECH TRANSCRIPT BOX */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-mono text-xs text-[#6a625a] uppercase tracking-wider">Spoken Input</span>
+            <span className="font-mono text-xs text-[#a39a8e]">Transcription Delay: 120ms</span>
           </div>
-
-          {/* Score */}
-          <div className="text-sm font-semibold text-orange-500">
-            Fluency 85%
+          <div className="rounded-[8px] bg-[#f5f3ee] border border-[#e8e6e1] p-4 text-[#1d1c1a] text-lg font-normal leading-relaxed min-h-[64px] font-sans">
+            {text}
+            <span className="inline-block w-2 h-5 bg-[#b4400f] ml-1 translate-y-0.5 animate-pulse" />
           </div>
         </div>
+
+        {/* FEEDBACK & DIAGNOSTIC CARD */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Diagnostic 1: Fluency */}
+          <div className="rounded-[8px] p-3.5 bg-[#f1efea] border border-[#e8e6e1] flex flex-col justify-between">
+            <span className="font-mono text-[11px] text-[#6a625a] uppercase">Fluency Score</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="font-display text-2xl font-normal text-[#1d1c1a]">88%</span>
+              <span className="font-mono text-xs text-[#1e5d36] font-medium">+4% wk</span>
+            </div>
+          </div>
+
+          {/* Diagnostic 2: Filler Words */}
+          <div className="rounded-[8px] p-3.5 bg-[#f1efea] border border-[#e8e6e1] flex flex-col justify-between">
+            <span className="font-mono text-[11px] text-[#6a625a] uppercase">Filler Detection</span>
+            <div className="flex items-baseline gap-1 mt-1">
+              <span className="font-display text-2xl font-normal text-[#b4400f]">1</span>
+              <span className="font-mono text-xs text-[#6a625a]">(&ldquo;um&rdquo;)</span>
+            </div>
+          </div>
+
+          {/* Diagnostic 3: AI Advice */}
+          <div className="rounded-[8px] p-3.5 bg-[#d9b3a9]/40 border border-[#d9b3a9] flex flex-col justify-between sm:col-span-1">
+            <span className="font-mono text-[11px] text-[#1d1c1a] uppercase font-semibold">Suggested Refinement</span>
+            <p className="text-xs text-[#1d1c1a] mt-1 font-medium leading-snug">
+              &ldquo;Overall, the presentation went smoothly...&rdquo;
+            </p>
+          </div>
+        </div>
+
       </div>
     </motion.div>
   );

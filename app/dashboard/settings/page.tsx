@@ -1,25 +1,17 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-//import LogoutButton from "@/components/LoginButton"
-import MatchButton from "@/components/MatchButton";
 import Settings from "@/components/Settings";
-import Footer from "@/components/Footer";
 
-export default async function Dashboard() {
-
-const session = await getServerSession(authOptions);
+export default async function SettingsPage() {
+  const session = await getServerSession(authOptions);
 
   if (!session) {
-    return <div>Not logged in</div>;
+    return (
+      <div className="rounded-[22px] bg-[#fcfbf8] border border-[#e8e6e1] p-12 text-center font-mono text-sm text-[#6a625a]">
+        Please log in to manage your account settings.
+      </div>
+    );
   }
 
-  return (
-    <div>
-        <Settings />
-        {/* <div className="justify-center"><LogoutButton /></div> */}
-        <Footer />
-    </div>
-    
-  );
+  return <Settings />;
 }
-

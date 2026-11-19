@@ -4,13 +4,14 @@ import { Flame, Zap } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useMemo, useEffect, useState } from "react";
+import Image from "next/image";
 
 interface UserStats {
   points: number;
   streak: number;
 }
 
-export default function Navbar() {
+export default function NavbarDashboard() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
@@ -22,12 +23,19 @@ export default function Navbar() {
 
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
+    if (!session?.user) {
+      setLoading(false);
+      return;
+    }
+
     const fetchStats = async () => {
       try {
         const res = await fetch("/api/points");
-        if (!res.ok) throw new Error("Failed to fetch");
+        if (!res.ok) {
+          // Gracefully handle unauthenticated or session expiry
+          return;
+        }
 
         const data = await res.json();
 
@@ -36,19 +44,17 @@ export default function Navbar() {
           streak: data.streak || 0,
         });
       } catch (err) {
-        console.error("Navbar stats error:", err);
+        // Silent fallback without noisy console logging
       } finally {
         setLoading(false);
       }
     };
 
     fetchStats();
-  }, []);
-
+  }, [session]);
 
   const segments = pathname?.split("/").filter(Boolean);
   const currentPage = segments?.[1] || "dashboard";
-
 
   const hour = new Date().getHours();
   const greeting =
@@ -56,73 +62,73 @@ export default function Navbar() {
     hour < 18 ? "Good afternoon" :
     "Good evening";
 
+  const firstName = session?.user?.name?.split(" ")[0] || "Speaker";
+
   const pageTitles: Record<string, string> = {
-    dashboard: `${greeting}, ${session?.user?.name?.split(" ")[0] || "User"}!`,
-    matchmaking: "Ready to speak?",
-    voicechat: "Live Practice",
-    aicoach: "AI Coach",
-    practice: "Practice Modes",
-    leaderboard: "Rankings",
-    settings: "Settings",
-    reports: "Reports & Safety",
+    dashboard: `${greeting}, ${firstName}`,
+    matchmaking: "Find a Conversation Partner",
+    voicechat: "Live Speaking Session",
+    aicoach: "AI Speaking Coach",
+    practice: "Practice Arenas",
+    leaderboard: "Global Standings",
+    settings: "Account & Voice Settings",
+    reports: "Safety & Community Moderation",
   };
 
   const title = useMemo(() => {
-    return pageTitles[currentPage] || "NoJudgment";
+    return pageTitles[currentPage] || "NoJudgment Studio";
   }, [currentPage, session, greeting]);
 
   return (
-    <header className="h-16 md:h-20 bg-white/70 backdrop-blur-md border-b border-[var(--color-border)] px-4 md:px-10 flex items-center justify-between sticky top-0 z-30">
-
+    <header className="h-18 bg-[#f6f5f1]/90 backdrop-blur-md border-b border-[#e8e6e1] px-6 sm:px-10 flex items-center justify-between transition-all">
       {/* TITLE */}
-      <h2 className="text-lg md:text-3xl font-bold text-[var(--color-tertiary)] truncate max-w-[60%] md:max-w-none">
+      <h2 className="font-display text-xl sm:text-2xl font-normal text-[#1d1c1a] tracking-tight truncate max-w-[65%] sm:max-w-none">
         {title}
       </h2>
 
-      {/* RIGHT SIDE */}
-      <div className="flex items-center gap-3 md:gap-6">
-
-        {/* STATS */}
-        <div className="hidden sm:flex items-center gap-3 md:gap-4 bg-[var(--color-neutral)] px-3 md:px-5 py-1.5 md:py-2.5 rounded-full border border-[var(--color-border)]">
-
+      {/* RIGHT SIDE: STATS & USER */}
+      <div className="flex items-center gap-3 sm:gap-4">
+        {/* STATS KEYCAP PILL */}
+        <div className="flex items-center gap-2 bg-[#f1efea] px-3 py-1.5 rounded-[5px] border border-[#e8e6e1] shadow-sm">
           {/* STREAK */}
-          <div className="flex items-center gap-1.5 md:gap-2 pr-2 md:pr-4 border-r border-gray-200">
-            <Flame size={16} className="md:w-[20px] md:h-[20px] text-[#FF6A00] fill-[#FF6A00]" />
-            <span className="font-bold text-sm md:text-base text-[var(--color-tertiary)]">
+          <div className="flex items-center gap-1.5 pr-2.5 border-r border-[#e8e6e1]" title="Active Practice Streak">
+            <Flame size={14} className="text-[#b4400f] fill-[#b4400f]" />
+            <span className="font-mono text-xs font-semibold text-[#1d1c1a]">
               {loading ? "--" : stats.streak}
+              <span className="text-[#6a625a] font-normal ml-0.5 hidden sm:inline">d</span>
             </span>
           </div>
 
           {/* POINTS */}
-          <div className="flex items-center gap-1.5 md:gap-2 pl-2 md:pl-3">
-            <Zap size={16} className="md:w-[20px] md:h-[20px] text-[#3B5BFF] fill-[#3B5BFF]" />
-            <span className="font-bold text-sm md:text-base text-[var(--color-tertiary)]">
-              {loading ? "--" : stats.points}
+          <div className="flex items-center gap-1.5 pl-1" title="Practice XP Points">
+            <Zap size={14} className="text-[#1d1c1a]" />
+            <span className="font-mono text-xs font-semibold text-[#1d1c1a]">
+              {loading ? "--" : stats.points.toLocaleString()}
+              <span className="text-[#6a625a] font-normal ml-0.5 hidden sm:inline">pts</span>
             </span>
           </div>
-
         </div>
 
-        {/* USER */}
+        {/* USER PROFILE AVATAR */}
         <div
           onClick={() => router.push("/dashboard/settings")}
-          title="Go to settings"
-          className="w-9 h-9 md:w-11 md:h-11 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0 cursor-pointer hover:scale-105 transition"
+          title="Account Settings"
+          className="w-9 h-9 rounded-[6px] overflow-hidden border border-[#e8e6e1] shadow-sm shrink-0 cursor-pointer hover:border-[#1d1c1a] hover:-translate-y-0.5 transition-all bg-[#f1efea] flex items-center justify-center active:translate-y-[1px]"
         >
           {session?.user?.image ? (
-            <img
+            <Image
               src={session.user.image}
-              alt="User"
+              alt={session.user.name || "User avatar"}
+              width={36}
+              height={36}
               className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#FF6A00] to-[#3B5BFF] flex items-center justify-center text-white font-bold text-sm md:text-base">
-              {session?.user?.name?.charAt(0) || "U"}
-            </div>
+            <span className="font-display font-medium text-sm text-[#1d1c1a]">
+              {firstName.charAt(0)}
+            </span>
           )}
         </div>
-
       </div>
     </header>
   );
